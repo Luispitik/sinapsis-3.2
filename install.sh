@@ -60,6 +60,20 @@ else
     echo -e "${GREEN}  OK${NC} Node.js $NODE_VER detected"
 fi
 
+PYTHON_CMD=""
+if command -v python3 &> /dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &> /dev/null && python --version 2>&1 | grep -q "Python 3"; then
+    PYTHON_CMD="python"
+fi
+if [ -z "$PYTHON_CMD" ]; then
+    echo -e "${YELLOW}  ! Python 3 not found — observation hooks will be disabled${NC}"
+    echo -e "${YELLOW}    Install it: https://python.org (optional but recommended)${NC}"
+else
+    PYTHON_VER=$($PYTHON_CMD --version)
+    echo -e "${GREEN}  OK${NC} $PYTHON_VER detected"
+fi
+
 if [ -d "$CLAUDE_HOME" ]; then
     echo -e "${GREEN}  OK${NC} ~/.claude/ exists"
 else
@@ -176,10 +190,13 @@ for skill_dir in "$SCRIPT_DIR/skills"/*/; do
     skill_name=$(basename "$skill_dir")
     target="$SKILLS_DIR/$skill_name"
     mkdir -p "$target"
-    cp "$skill_dir"* "$target/" 2>/dev/null || true
+    cp -r "$skill_dir". "$target/" 2>/dev/null || true
     skill_count=$((skill_count + 1))
     echo -e "${GREEN}  OK${NC} $skill_name"
 done
+
+# Make hook scripts executable
+find "$SKILLS_DIR" -name "*.sh" -path "*/hooks/*" -exec chmod +x {} \; 2>/dev/null || true
 
 # ── Step 8: Copy slash commands ──
 echo -e "${BLUE}[8/8]${NC} Installing slash commands..."

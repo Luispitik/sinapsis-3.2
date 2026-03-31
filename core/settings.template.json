@@ -10,7 +10,7 @@
           {
             "_comment": "observe pre: logs tool name + input to observations.jsonl (async, non-blocking)",
             "type": "command",
-            "command": "bash ~/.claude/skills/sinapsis/hooks/observe.sh pre",
+            "command": "bash ~/.claude/skills/sinapsis-learning/hooks/observe.sh pre",
             "async": true,
             "timeout": 10
           },
@@ -45,7 +45,7 @@
           {
             "_comment": "observe post: logs tool output + is_error flag (async, non-blocking)",
             "type": "command",
-            "command": "bash ~/.claude/skills/sinapsis/hooks/observe.sh post",
+            "command": "bash ~/.claude/skills/sinapsis-learning/hooks/observe.sh post",
             "async": true,
             "timeout": 10
           }
