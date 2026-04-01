@@ -1,4 +1,4 @@
-# Synapis v3.2 — Skills on Demand for Claude Code
+# Sinapsis v4.1 — Skills on Demand for Claude Code
 
 ## Session Entry (EXECUTE ON FIRST MESSAGE OF EVERY SESSION)
 
@@ -37,7 +37,7 @@ Use the `Read` tool (NOT Glob) to check for daily summaries:
 
 3. If no context found, offer two paths:
    ```
-   Synapis instalado. Bienvenido.
+   Sinapsis instalado. Bienvenido.
 
    [A] Rapida — 3 preguntas y empezamos a trabajar
    [B] Completa — Cuentame todo sobre ti y tu trabajo

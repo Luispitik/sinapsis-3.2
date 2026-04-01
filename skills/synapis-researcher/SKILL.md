@@ -1,4 +1,4 @@
-# Synapis Researcher v1.0
+# Sinapsis Researcher v1.0
 
 > Deep research skill for multi-source investigation and synthesis.
 > Use when thorough analysis is needed on any topic.
@@ -43,7 +43,7 @@ Use available tools in this priority order:
 1. **Web Search** -- broad search for recent, authoritative sources
 2. **Documentation** -- official docs via Context7 or direct fetch
 3. **Code Search** -- GitHub repos for real-world implementations
-4. **Local Knowledge** -- instincts and observations from Synapis
+4. **Local Knowledge** -- instincts and observations from Sinapsis
 5. **Cached Research** -- previous research on similar topics
 
 ### Phase 3: Source Evaluation
@@ -196,7 +196,7 @@ Date: [current date]
 
 ## Integration Points
 
-- **Synapis Learning**: Research findings can generate new instincts
-- **Synapis Instincts**: Existing instincts provide context for research
+- **Sinapsis Learning**: Research findings can generate new instincts
+- **Sinapsis Instincts**: Existing instincts provide context for research
 - **Skill Router**: May install research-related skills as needed
 - **Operator State**: Cross-project research lessons stored here

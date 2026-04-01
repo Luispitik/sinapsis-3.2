@@ -1,6 +1,6 @@
 {
-  "version": "3.2",
-  "system": "synapis",
+  "version": "4.1",
+  "system": "sinapsis",
   "projects": [],
   "note": "Projects se registran automaticamente al abrir carpetas con Claude Code"
 }

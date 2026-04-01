@@ -1,6 +1,6 @@
 {
-  "version": "3.2",
-  "system": "synapis",
+  "version": "4.1",
+  "system": "sinapsis",
   "lastUpdated": "",
   "globalSkills": [
     {
@@ -13,7 +13,7 @@
     },
     {
       "id": "synapis-learning",
-      "name": "Synapis Learning",
+      "name": "Sinapsis Learning",
       "description": "Aprendizaje continuo: observa patrones, captura instincts, confidence scoring",
       "type": "global",
       "status": "active",
@@ -21,7 +21,7 @@
     },
     {
       "id": "synapis-instincts",
-      "name": "Synapis Instincts",
+      "name": "Sinapsis Instincts",
       "description": "Base de conocimiento con reglas aprendidas de proyectos anteriores",
       "type": "global",
       "status": "active",

@@ -53,7 +53,6 @@ process.stdin.on("end", () => {
         break; // Only inject the most recent one
       }
     } catch(e) {}
-    break;
   }
 
   // ── SOURCE 2: Technical context.md (files touched, errors) ──

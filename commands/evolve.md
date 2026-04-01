@@ -15,10 +15,10 @@ Run with `/evolve` or "evolve my instincts".
 
 ### Step 1: Gather Candidates
 
-Read `~/.claude/skills/_instincts.json` and filter:
-- Confidence >= 0.7 (mature instincts only)
+Read `~/.claude/skills/_instincts-index.json` and filter:
+- Level `confirmed` or `permanent` (skip drafts)
 - Not already evolved (`evolvedTo === null`)
-- Sort by confidence descending, then by occurrences
+- Sort by level (permanent first), then by domain
 
 ### Step 2: Cluster Related Instincts
 
@@ -114,7 +114,7 @@ EVOLUTION CANDIDATES
 
 1. Move instinct from project scope to global scope
 2. Retain full history
-3. Update `_instincts.json`
+3. Update `_instincts-index.json`
 
 ### Step 5: Summary
 

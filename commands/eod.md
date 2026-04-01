@@ -41,9 +41,9 @@ git status -s 2>/dev/null
 gh pr list --state open --author @me 2>/dev/null
 ```
 
-Also gather Synapis learning state:
-- Read `~/.claude/skills/_instincts.json` → count instincts with `lastSeen` = today
-- Read `~/.claude/skills/_observations.json` → count entries from today
+Also gather Sinapsis learning state:
+- Read `~/.claude/skills/_instincts-index.json` → count total instincts by level (draft/confirmed/permanent)
+- Read `~/.claude/homunculus/projects/{hash}/observations.jsonl` → count entries from today
 
 ### Step 2: Ask for Priorities (unless --quick)
 
@@ -82,7 +82,7 @@ Branch: {current-branch}
 
 ---
 
-## Synapis Learning
+## Sinapsis Learning
 - Instincts today: {count new or updated}
 - Observations today: {count}
 

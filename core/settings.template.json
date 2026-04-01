@@ -1,7 +1,7 @@
 {
   "_comment": "Sinapsis v4.1 — settings.json template. Copy to ~/.claude/settings.json (merge with existing).",
-  "_hooks_total": 7,
-  "_hooks_breakdown": "PreToolUse(4) + PostToolUse(1) + Stop(2)",
+  "_hooks_total": 6,
+  "_hooks_breakdown": "PreToolUse(4) + PostToolUse(1) + Stop(1)",
   "hooks": {
     "PreToolUse": [
       {

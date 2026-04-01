@@ -1,4 +1,4 @@
-# Skill Router v3.0
+# Skill Router v4.1
 
 > Orchestrates skill discovery, installation, and project lifecycle.
 > This is the central hub for Skills on Demand.
@@ -68,7 +68,7 @@ Configure everything else silently.
 **Phase 1 — Welcome & Context Discovery** (automatic, no user input needed)
 
 ```
-Welcome to Synapis!
+Welcome to Sinapsis!
 
 You've just installed a system that makes Claude Code remember you,
 learn from your work, and get better over time.
@@ -216,8 +216,8 @@ Your system is configured. Here's what you have:
 
 ALWAYS ACTIVE (5 skills, ~2,700 tokens):
   1. Skill Router — decides what tools to load per project
-  2. Synapis Learning — observes your work silently
-  3. Synapis Instincts — stores what it learns
+  2. Sinapsis Learning — observes your work silently
+  3. Sinapsis Instincts — stores what it learns
   4. Deep Researcher — researches any topic in depth
   5. Context Optimizer — keeps token usage efficient
 
@@ -261,7 +261,7 @@ If yes → run /skill-audit flow showing token impact per skill.
 Everything is configured. From now on:
 - Every session loads your profile automatically
 - Decisions propagate across all projects
-- Synapis learns from your work in the background
+- Sinapsis learns from your work in the background
 - Passive rules protect your code silently
 
 After 3-5 sessions, try /evolve to see what I've learned about you.
@@ -520,9 +520,9 @@ Rules:
 
 ## Integration Points
 
-- **Synapis Learning**: Observes skill usage patterns to suggest installations
-- **Synapis Instincts**: Reads instinct domains to recommend matching skills
-- **Synapis Optimizer**: Provides token budget data for installation decisions
+- **Sinapsis Learning**: Observes skill usage patterns to suggest installations
+- **Sinapsis Instincts**: Reads instinct domains to recommend matching skills
+- **Sinapsis Optimizer**: Provides token budget data for installation decisions
 - **Operator State**: Source of truth for strategic decisions and retired tech
 
 ---

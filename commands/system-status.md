@@ -43,7 +43,7 @@ Run with `/system-status` or "system status".
   Total:        312 logged
   Active:       145 (< 30 days)
   Archivable:   167 (> 30 days, no linked instinct)
-  Tip: Run /analyze-observations to process
+  Tip: Run /analyze-session to process
 
   PASSIVE RULES                                 [GREEN]
   ─────────────

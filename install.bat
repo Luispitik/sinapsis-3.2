@@ -50,6 +50,19 @@ if %errorlevel% neq 0 (
     for /f "tokens=*" %%v in ('node --version') do echo   OK Node.js %%v detected
 )
 
+where python3 >nul 2>&1
+if %errorlevel% neq 0 (
+    where python >nul 2>&1
+    if %errorlevel% neq 0 (
+        echo   ! Python 3 not found -- observation hooks will be disabled
+        echo     Install it: https://python.org (optional but recommended^)
+    ) else (
+        for /f "tokens=*" %%v in ('python --version 2^>^&1') do echo   OK %%v detected
+    )
+) else (
+    for /f "tokens=*" %%v in ('python3 --version 2^>^&1') do echo   OK %%v detected
+)
+
 if exist "%CLAUDE_HOME%" (
     echo   OK .claude\ exists
 ) else (
@@ -81,6 +94,7 @@ if not exist "%ARCHIVED_DIR%" mkdir "%ARCHIVED_DIR%"
 if not exist "%COMMANDS_DIR%" mkdir "%COMMANDS_DIR%"
 if not exist "%CLAUDE_HOME%\projects" mkdir "%CLAUDE_HOME%\projects"
 if not exist "%HOMUNCULUS_DIR%" mkdir "%HOMUNCULUS_DIR%"
+if not exist "%SKILLS_DIR%\_daily-summaries" mkdir "%SKILLS_DIR%\_daily-summaries"
 
 echo   OK Directories created
 
@@ -124,7 +138,7 @@ echo   NOTE: On Windows, hooks run via Git Bash or WSL. See README for details.
 echo [6/8] Configuring hooks in settings.json...
 
 if not exist "%CLAUDE_HOME%\settings.json" (
-    node -e "const fs=require('fs');const t=JSON.parse(fs.readFileSync('%SCRIPT_DIR%core\\settings.template.json','utf8'));function s(o){if(Array.isArray(o))return o.map(s);if(typeof o==='object'&&o!==null){const r={};for(const[k,v]of Object.entries(o)){if(k.startsWith('_'))continue;r[k]=s(v);}return r;}return o;}fs.writeFileSync('%CLAUDE_HOME%\\settings.json',JSON.stringify(s(t),null,2));" >nul 2>&1
+    node -e "var fs=require('fs'),p1=process.argv[1],p2=process.argv[2];var t=JSON.parse(fs.readFileSync(p1,'utf8'));function s(o){if(Array.isArray(o))return o.map(s);if(typeof o==='object'&&o!==null){var r={};for(var k in o){if(k[0]==='_')continue;r[k]=s(o[k]);}return r;}return o;}fs.writeFileSync(p2,JSON.stringify(s(t),null,2));" "%SCRIPT_DIR%core\settings.template.json" "%CLAUDE_HOME%\settings.json" >nul 2>&1
     if %errorlevel% equ 0 (
         echo   OK settings.json created with v4.1 hooks
     ) else (

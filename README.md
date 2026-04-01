@@ -288,11 +288,11 @@ See `core/settings.template.json` for the exact configuration.
 
 Never lose context between sessions. Run `/eod` before closing Claude:
 
-1. Synapis captures your git activity, open PRs, and learning progress
+1. Sinapsis captures your git activity, open PRs, and learning progress
 2. You add priorities and notes for tomorrow
 3. Next morning, Claude greets you with a summary and asks where to start
 
-No more "what was I doing yesterday?" — Synapis remembers for you.
+No more "what was I doing yesterday?" — Sinapsis remembers for you.
 
 Use `/eod --quick` for a fast auto-generated summary, or `/eod --yesterday` to review your last saved session.
 

@@ -52,7 +52,7 @@ TOKEN OVERHEAD ANALYSIS
   9. passive-status.md         1.2 KB     ~300   1 week ago
   10. instinct-status.md       1.8 KB     ~450   1 week ago
   11. promote.md               1.0 KB     ~250   2 weeks ago
-  12. analyze-observations.md  2.4 KB     ~600   1 week ago
+  12. analyze-session.md       2.4 KB     ~600   1 week ago
   13. projects.md              1.4 KB     ~350   1 week ago
   14. skill-audit.md           3.2 KB     ~800   today
   ─────────────────────────────────────────────

@@ -1,6 +1,8 @@
-# /promote -- Promote Instincts to Global Scope
+# /promote -- Promote Instincts
 
-> Move project-scoped instincts to global scope so they apply everywhere.
+> Promote confirmed instincts to permanent level, giving them
+> highest priority in domain dedup. Permanent instincts always
+> win over confirmed ones in the same domain.
 
 ---
 
@@ -12,9 +14,9 @@ Run with `/promote` or "promote instinct".
 
 ## Requirements
 
-- Instinct must have confidence >= 0.7
-- Instinct must be project-scoped (already global instincts cannot be promoted)
-- Instinct should have been observed in 2+ projects OR be user-validated
+- Instinct must have level `confirmed` (drafts cannot be promoted directly)
+- Instinct must be in `_instincts-index.json`
+- User validates the promotion
 
 ---
 
@@ -23,52 +25,52 @@ Run with `/promote` or "promote instinct".
 ### Step 1: Show Eligible Instincts
 
 ```
-PROMOTE TO GLOBAL
+PROMOTE TO PERMANENT
 
-  Eligible instincts from project "{current-project}":
+  Eligible instincts (confirmed level):
 
-  #  ID          Conf  Hits  Trigger -> Action
-  1. inst_p001   0.82   5    API errors -> use AppError class
-  2. inst_p003   0.78   4    Auth -> always check session expiry
-  3. inst_p005   0.75   3    Forms -> validate client-side first
-  4. inst_p008   0.71   3    Before deploy -> verify migrations
+  #  ID                       Domain        Trigger Pattern
+  1. git-commit-conventional  git           git commit|commit message
+     → "Use conventional commits: feat/fix/chore/docs/..."
 
-  Not eligible (confidence < 0.7):
-  - inst_p002 [0.55] Caching -> invalidate on write (needs more evidence)
-  - inst_p004 [0.40] Logging -> structured JSON format (hypothesis only)
+  2. error-handling-explicit  code-quality  try|catch|error|exception
+     → "Handle errors explicitly. No silent catches."
+
+  3. api-auth-check           security      route\.ts|api/
+     → "API routes must validate authentication."
+
+  Already permanent (cannot promote further):
+  - env-vars-never-hardcode [security]
 
   Select instincts to promote:
-  Enter numbers (e.g., "1 3 4"), [A] All eligible, [X] Cancel
+  Enter numbers (e.g., "1 3"), [A] All eligible, [X] Cancel
 ```
 
 ### Step 2: Confirm
 
 ```
-  Promoting 3 instincts to global scope:
+  Promoting 2 instincts to permanent:
 
-  1. inst_p001 -> Will apply to ALL projects as API error pattern
-  2. inst_p003 -> Will apply to ALL projects as auth pattern
-  3. inst_p005 -> Will apply to ALL projects as form pattern
+  1. git-commit-conventional → permanent (wins over any confirmed git instinct)
+  2. api-auth-check → permanent (wins over any confirmed security instinct)
 
-  This means these patterns will be enforced everywhere.
+  Permanent instincts have highest priority in domain dedup.
   [Y] Confirm  [N] Cancel
 ```
 
 ### Step 3: Execute
 
-1. Move instincts from `projects.{project}` to `global` in `_instincts.json`
-2. Retain full history
-3. Update `lastSeen` to current date
-4. Add history entry: `{"date": "...", "event": "promoted-to-global"}`
+1. Update `level` from `confirmed` to `permanent` in `_instincts-index.json`
+2. Preserve all other fields (trigger_pattern, inject, domain, origin, added)
 
 ### Step 4: Summary
 
 ```
 PROMOTION COMPLETE
 
-  3 instincts promoted to global scope.
-  Global instincts: 15 -> 18
-  Project instincts: 28 -> 25
+  2 instincts promoted to permanent.
+  Permanent: 1 → 3
+  Confirmed: 3 → 1
 
-  These patterns now apply to all projects automatically.
+  These instincts now have highest priority in domain dedup.
 ```
