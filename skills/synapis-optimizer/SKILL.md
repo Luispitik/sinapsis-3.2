@@ -1,4 +1,4 @@
-# Synapis Optimizer v1.0
+# Sinapsis Optimizer v1.0
 
 > Context optimization skill. Manages token budgets, audits skill overhead,
 > detects redundancy, and keeps the system lean.
@@ -174,14 +174,14 @@ MEMORY STATUS
 ```
 INSTINCT STATUS
 
-  Total: 43 instincts
-  Active (confidence >= 0.5): 31
-  Stale (no hit in 60+ days): 7
-  Low confidence (< 0.3): 5
+  Total: 15 instincts
+  Permanent: 3 (highest priority)
+  Confirmed: 8 (active, injected on match)
+  Drafts:    4 (pending review)
 
   Recommendations:
-  1. Archive 5 low-confidence instincts (likely noise)
-  2. Review 7 stale instincts (may be obsolete)
+  1. Review 4 draft proposals with /analyze-session
+  2. Consider promoting mature confirmed instincts to permanent
 
   [1] Archive low-conf  [2] Review stale  [A] Both  [X] Skip
 ```
@@ -206,7 +206,7 @@ compression suggestions, and memory cleanup.
 
 ## Automatic Recommendations
 
-Synapis Optimizer passively monitors and will suggest:
+Sinapsis Optimizer passively monitors and will suggest:
 
 1. **After 10+ sessions without using a skill**: "Consider archiving {skill} -- unused for {N} sessions"
 2. **When installing a new skill**: "This overlaps 60% with {existing-skill}. Merge instead?"
@@ -220,7 +220,7 @@ These suggestions appear once and can be dismissed.
 ## Integration Points
 
 - **Skill Router**: Provides token data for installation decisions
-- **Synapis Learning**: Monitors observation log size
-- **Synapis Instincts**: Reports instinct count and health
+- **Sinapsis Learning**: Monitors observation log size
+- **Sinapsis Instincts**: Reports instinct count and health
 - **/system-status**: Contributes the token budget section
 - **/skill-audit**: Full deep audit command

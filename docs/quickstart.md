@@ -1,6 +1,6 @@
-# Synapis — Guia de Configuracion Post-Instalacion
+# Sinapsis — Guia de Configuracion Post-Instalacion
 
-> Acabas de instalar Synapis. Esta guia te explica que tienes, que hace cada parte, y como configurarlo para que funcione al 100%.
+> Acabas de instalar Sinapsis. Esta guia te explica que tienes, que hace cada parte, y como configurarlo para que funcione al 100%.
 
 ---
 
@@ -35,11 +35,11 @@ Despues de ejecutar `install.sh` o `install.bat`, tienes esto en tu ordenador:
 1. Abre tu terminal
 2. Navega a cualquier carpeta de proyecto: `cd mi-proyecto`
 3. Ejecuta: `claude`
-4. Synapis detecta que es tu primera vez y te pregunta
+4. Sinapsis detecta que es tu primera vez y te pregunta
 
 ### Que te va a preguntar
 
-Synapis busca primero si ya tienes informacion guardada (CLAUDE.md previo, proyectos anteriores, archivos de configuracion). Si encuentra algo, te lo muestra:
+Sinapsis busca primero si ya tienes informacion guardada (CLAUDE.md previo, proyectos anteriores, archivos de configuracion). Si encuentra algo, te lo muestra:
 
 ```
 He encontrado informacion sobre ti:
@@ -88,7 +88,7 @@ Despues del onboarding, cada vez que abras una sesion veras:
 |------|-----------|---------|
 | **[1] Skills on Demand** | Quieres que Claude sea inteligente automaticamente | "Quiero hacer una landing page" → carga las skills de web |
 | **[2] Skill Picker** | Quieres control total sobre que se carga | Sabes exactamente que skills necesitas |
-| **[3] Freestyle** | No quieres que Synapis interfiera | Tarea rapida, prueba, o prefieres Claude vanilla |
+| **[3] Freestyle** | No quieres que Sinapsis interfiera | Tarea rapida, prueba, o prefieres Claude vanilla |
 
 **Puedes cambiar de modo en cualquier momento** diciendo "launcher".
 
@@ -108,7 +108,7 @@ Las reglas pasivas son "guardianes" que se activan solos. Por defecto tienes 5:
 
 ### Como anadir mas reglas
 
-Usa `/evolve` despues de varias sesiones. Synapis te sugerira nuevas reglas basadas en tus patrones. Tu decides cuales activar.
+Usa `/evolve` despues de varias sesiones. Sinapsis te sugerira nuevas reglas basadas en tus patrones. Tu decides cuales activar.
 
 ### Como activar las reglas en settings.json
 
@@ -146,7 +146,7 @@ Para que las reglas funcionen automaticamente (sin que Claude las lea cada vez),
 }
 ```
 
-**No quieres tocar settings.json?** No pasa nada. Las reglas siguen funcionando porque Synapis las lee al inicio de cada sesion. Los hooks simplemente las hacen mas fiables.
+**No quieres tocar settings.json?** No pasa nada. Las reglas siguen funcionando porque Sinapsis las lee al inicio de cada sesion. Los hooks simplemente las hacen mas fiables.
 
 ---
 
@@ -162,7 +162,7 @@ Escribe: /system-status
 ```
 
 ### /evolve
-Analiza los patrones que Synapis ha detectado y te propone convertirlos en skills, reglas, o comandos.
+Analiza los patrones que Sinapsis ha detectado y te propone convertirlos en skills, reglas, o comandos.
 
 ```
 Escribe: /evolve
@@ -180,7 +180,7 @@ Responde: "1S 2E 3R"
 ```
 
 ### /skill-audit
-Si ya tenias skills instaladas antes de Synapis, este comando las analiza y te propone limpieza:
+Si ya tenias skills instaladas antes de Sinapsis, este comando las analiza y te propone limpieza:
 
 ```
 Escribe: /skill-audit
@@ -201,13 +201,13 @@ Copia las skills, estructura, y configuracion de un proyecto anterior.
 
 ## Paso 6: Crea tus propias skills (avanzado)
 
-Synapis es un sistema que crece contigo. Hay tres formas de crear skills:
+Sinapsis es un sistema que crece contigo. Hay tres formas de crear skills:
 
 ### A. Automatica (recomendada)
-Trabaja normal. Synapis observa. Cuando detecta un patron maduro, `/evolve` te lo propone. Tu aceptas o rechazas.
+Trabaja normal. Sinapsis observa. Cuando detecta un patron maduro, `/evolve` te lo propone. Tu aceptas o rechazas.
 
 ### B. Semi-automatica
-Dile a Claude: "Aprende esto: siempre que haga X, haz Y". Synapis lo registra como instinct y lo madura con el tiempo.
+Dile a Claude: "Aprende esto: siempre que haga X, haz Y". Sinapsis lo registra como instinct y lo madura con el tiempo.
 
 ### C. Manual
 Crea un archivo `.md` en `~/.claude/skills/_library/tu-skill/SKILL.md` con este formato:
@@ -237,8 +237,8 @@ tokens_estimate: 500
 
 ## Paso 7: Resuelve problemas comunes
 
-### "Synapis no se activa al abrir Claude Code"
-- Verifica que `~/.claude/CLAUDE.md` existe y contiene la seccion "Synapis"
+### "Sinapsis no se activa al abrir Claude Code"
+- Verifica que `~/.claude/CLAUDE.md` existe y contiene la seccion "Sinapsis"
 - Ejecuta `/system-status` para ver si el sistema esta operativo
 
 ### "Mis skills no se instalan en el proyecto"
@@ -247,7 +247,7 @@ tokens_estimate: 500
 
 ### "Las reglas pasivas no se activan solas"
 - Las reglas se aplican de dos formas: por hooks (settings.json) o por lectura directa
-- Si no tienes hooks configurados, Synapis las lee al inicio de sesion
+- Si no tienes hooks configurados, Sinapsis las lee al inicio de sesion
 - Para maxima fiabilidad, configura los hooks (Paso 4)
 
 ### "Quiero resetear todo y empezar de cero"
@@ -260,11 +260,11 @@ cd synapis
 ./install.sh  # o install.bat en Windows
 ```
 
-### "Quiero desinstalar Synapis"
+### "Quiero desinstalar Sinapsis"
 Elimina estas carpetas:
 - `~/.claude/skills/skill-router/`
 - `~/.claude/skills/synapis-*/`
-- Los comandos en `~/.claude/commands/` que instalo Synapis
+- Los comandos en `~/.claude/commands/` que instalo Sinapsis
 
 Tu CLAUDE.md y proyectos quedan intactos.
 
@@ -272,7 +272,7 @@ Tu CLAUDE.md y proyectos quedan intactos.
 
 ## Siguiente paso
 
-Usa Claude Code como siempre. Synapis trabaja en segundo plano.
+Usa Claude Code como siempre. Sinapsis trabaja en segundo plano.
 
 Despues de 3-5 sesiones, ejecuta `/evolve` y mira que ha aprendido. Te sorprendera.
 
@@ -282,8 +282,8 @@ Despues de 3-5 sesiones, ejecuta `/evolve` y mira que ha aprendido. Te sorprende
 
 Si quieres aprender a crear skills avanzadas, personalizar el sistema para tu negocio, o sacarle el maximo partido:
 
-**[salgadoia.com](https://salgadoia.com)** — Mentorias, cursos y consulting sobre Claude Code + Synapis.
+**[salgadoia.com](https://salgadoia.com)** — Mentorias, cursos y consulting sobre Claude Code + Sinapsis.
 
 ---
 
-*Synapis: porque tu asistente deberia recordar quien eres.*
+*Sinapsis: porque tu asistente deberia recordar quien eres.*

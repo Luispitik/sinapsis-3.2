@@ -33,17 +33,17 @@ Run with `/system-status` or "system status".
 
   INSTINCTS                                     [GREEN]
   ─────────
-  Global:       15 (3 laws, 8 instincts, 4 patterns)
-  Project:      28 (current project)
-  Pending:      4 ready for /evolve (confidence >= 0.7)
-  Stale:        2 (no activity in 60+ days)
+  Permanent:    3 (highest priority in domain dedup)
+  Confirmed:    8 (injected when trigger matches)
+  Drafts:       4 (pending review with /analyze-session)
+  Domains:      5 (security, git, code-quality, tooling, testing)
 
   OBSERVATIONS                                  [YELLOW]
   ────────────
   Total:        312 logged
   Active:       145 (< 30 days)
   Archivable:   167 (> 30 days, no linked instinct)
-  Tip: Run /analyze-observations to process
+  Tip: Run /analyze-session to process
 
   PASSIVE RULES                                 [GREEN]
   ─────────────
@@ -124,7 +124,7 @@ After displaying the dashboard, offer:
 Quick actions:
   [E] /evolve          -- Process mature instincts
   [A] /skill-audit     -- Deep skill analysis
-  [O] /analyze-obs     -- Process observations
+  [O] /analyze-session -- Review session proposals
   [P] /passive-status  -- Passive rules detail
   [R] Refresh          -- Re-run this dashboard
 ```

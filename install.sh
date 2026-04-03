@@ -105,6 +105,7 @@ mkdir -p "$COMMANDS_DIR"
 mkdir -p "$CLAUDE_HOME/projects"
 mkdir -p "$HOMUNCULUS_DIR"
 mkdir -p "$SKILLS_DIR/_daily-summaries"
+touch "$CLAUDE_HOME/homunculus/.last-learn" 2>/dev/null || true
 
 echo -e "${GREEN}  OK${NC} Directories created"
 

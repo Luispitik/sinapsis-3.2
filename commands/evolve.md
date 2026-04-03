@@ -15,10 +15,10 @@ Run with `/evolve` or "evolve my instincts".
 
 ### Step 1: Gather Candidates
 
-Read `~/.claude/skills/_instincts.json` and filter:
-- Confidence >= 0.7 (mature instincts only)
+Read `~/.claude/skills/_instincts-index.json` and filter:
+- Level `confirmed` or `permanent` (skip drafts)
 - Not already evolved (`evolvedTo === null`)
-- Sort by confidence descending, then by occurrences
+- Sort by level (permanent first), then by domain
 
 ### Step 2: Cluster Related Instincts
 
@@ -35,11 +35,11 @@ For each cluster, show:
 ```
 EVOLUTION CANDIDATES
 
-  CLUSTER 1: "API Error Handling" (3 instincts)
-  ────────────────────────────────────────────
-  inst_p001 [0.82] When writing API errors -> use AppError class
-  inst_p004 [0.78] When catching exceptions -> log with context
-  inst_g007 [0.75] When returning errors -> include error code + message
+  CLUSTER 1: "API Error Handling" (3 instincts, domain: code-quality)
+  ────────────────────────────────────────────────────────────────────
+  api-error-appclass  [confirmed] "API errors -> use AppError class"
+  catch-with-context  [confirmed] "Catch exceptions -> log with context"
+  error-code-response [confirmed] "Return errors -> include error code"
 
   Combined token impact if evolved:
     [S] Skill    ~800 tokens (new skill in library)
@@ -47,18 +47,17 @@ EVOLUTION CANDIDATES
     [A] Agent    ~1,200 tokens (autonomous agent)
     [R] Rule     ~100 tokens (passive rule, always active)
     [E] Enrich   +~200 tokens (add to existing "api-builder" skill)
-    [P] Promote  ~0 tokens (move to global scope only)
+    [P] Promote  ~0 tokens (promote to permanent level)
     [X] Skip     (leave as instincts)
 
   Choose action: _
 
 
-  CLUSTER 2: "Deployment Checklist" (4 instincts)
-  ────────────────────────────────────────────────
-  inst_g003 [0.91] Before deploy -> run tests
-  inst_g005 [0.85] Before deploy -> check env vars
-  inst_p008 [0.80] Before deploy -> verify migrations
-  inst_p009 [0.77] After deploy -> smoke test critical endpoints
+  CLUSTER 2: "Deployment Checklist" (3 instincts, domain: deployment)
+  ────────────────────────────────────────────────────────────────────
+  deploy-run-tests   [permanent]  "Before deploy -> run tests"
+  deploy-check-env   [confirmed]  "Before deploy -> check env vars"
+  deploy-migrations  [confirmed]  "Before deploy -> verify migrations"
 
   [S] [C] [A] [R] [E] [P] [X]
 
@@ -66,7 +65,7 @@ EVOLUTION CANDIDATES
 
 
   SOLO INSTINCTS (not clustered):
-  inst_g010 [0.88] When writing docs -> include code examples
+  docs-code-examples [confirmed] "When writing docs -> include code examples"
     [P] Promote  [R] Rule  [E] Enrich existing skill  [X] Skip
 ```
 
@@ -114,7 +113,7 @@ EVOLUTION CANDIDATES
 
 1. Move instinct from project scope to global scope
 2. Retain full history
-3. Update `_instincts.json`
+3. Update `_instincts-index.json`
 
 ### Step 5: Summary
 

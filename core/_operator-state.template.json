@@ -1,6 +1,6 @@
 {
-  "version": "3.2",
-  "system": "synapis",
+  "version": "4.1",
+  "system": "sinapsis",
   "needsOnboarding": true,
   "operator": {
     "name": "",

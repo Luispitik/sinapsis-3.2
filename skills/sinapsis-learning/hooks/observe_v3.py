@@ -65,11 +65,8 @@ def main():
                 project_id = hashlib.sha256(hash_input.encode()).hexdigest()[:12]
                 project_dir = os.path.join(projects_dir, project_id)
 
-                # Create directory structure
-                for d in ["instincts/personal", "instincts/inherited",
-                          "observations.archive", "evolved/skills",
-                          "evolved/commands", "evolved/agents"]:
-                    os.makedirs(os.path.join(project_dir, d), exist_ok=True)
+                # Create project directory (archive dir created on demand)
+                os.makedirs(project_dir, exist_ok=True)
         except Exception:
             pass
 
@@ -115,8 +112,14 @@ def main():
     if event == "tool_complete" and tool_output is not None:
         observation["output"] = scrub(output_str)
         # Flag errors — session-learner uses this to detect error→resolution patterns
-        error_keywords = ["error", "failed", "exception", "traceback", "errno"]
-        if any(kw in output_str.lower() for kw in error_keywords):
+        # Use word boundaries to avoid false positives like "0 errors found"
+        error_patterns = [
+            r"\berror[:\s]", r"\bfailed\b", r"\bexception\b",
+            r"\btraceback\b", r"\berrno\b", r"\bEPERM\b", r"\bENOENT\b",
+            r"exit code [1-9]", r"command not found",
+        ]
+        output_lower = output_str.lower()
+        if any(re.search(pat, output_lower) for pat in error_patterns):
             observation["is_error"] = True
 
     obs_file = os.path.join(project_dir, "observations.jsonl")

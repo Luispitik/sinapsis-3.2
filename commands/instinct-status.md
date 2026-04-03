@@ -1,7 +1,7 @@
 # /instinct-status -- Instinct Dashboard
 
-> Show all instincts (project + global) with confidence scoring,
-> lifecycle stage, and evolution readiness.
+> Show all instincts grouped by level (permanent, confirmed, draft)
+> with their domains, trigger patterns, and injection status.
 
 ---
 
@@ -13,11 +13,10 @@ Run with `/instinct-status` or "show my instincts".
 
 ## Process
 
-1. Read `~/.claude/skills/_instincts.json`
-2. Separate global vs project instincts
-3. Group by lifecycle stage
-4. Sort by confidence descending within each group
-5. Display dashboard
+1. Read `~/.claude/skills/_instincts-index.json`
+2. Read `~/.claude/skills/_instinct-proposals.json` (if exists, for drafts)
+3. Group by level: permanent → confirmed → draft
+4. Display dashboard
 
 ---
 
@@ -26,65 +25,54 @@ Run with `/instinct-status` or "show my instincts".
 ```
 INSTINCT STATUS
 
-  Total: 43 instincts (15 global + 28 project)
-  Evolution candidates: 4 (confidence >= 0.7, not yet evolved)
+  Active instincts: 5 (2 permanent + 3 confirmed)
+  Pending proposals: 2 drafts (review with /analyze-session)
+  Domain dedup: max 3 domains injected per tool use
 
   ============================================
-  GLOBAL INSTINCTS (15)
+  PERMANENT (always wins in domain dedup)
   ============================================
 
-  LAWS (confidence >= 0.9)
-  ──────────────────────
-  ID         Conf   Hits  Domain        Trigger -> Action
-  inst_g001  0.92   12    development   DB tables -> add timestamps
-  inst_g002  0.91   18    development   API routes -> validate input first
-  inst_g003  0.90   47    workflow      Commits -> conventional format
-
-  INSTINCTS (confidence 0.7 - 0.9)
-  ──────────────────────────────────
-  inst_g004  0.85    8    deployment    Before deploy -> run tests
-  inst_g005  0.82    6    deployment    Before deploy -> check env vars
-  inst_g006  0.78    5    testing       Tests -> use real DB, not mocks
-  inst_g007  0.75   11    development   Errors -> include error code
-
-  PATTERNS (confidence 0.5 - 0.7)
-  ────────────────────────────────
-  inst_g008  0.65    4    deployment    Deploy -> verify migrations
-  inst_g009  0.60    3    security      Auth -> check session expiry
-  inst_g010  0.55    2    documentation Docs -> include code examples
-
-  HYPOTHESES (confidence 0.3 - 0.5)
-  ──────────────────────────────────
-  inst_g011  0.40    2    debugging     Errors -> log context with stack
-  inst_g012  0.35    1    performance   DB queries -> add index hints
-
-  OBSERVATIONS (confidence < 0.3)
-  ────────────────────────────────
-  inst_g013  0.20    1    design        Components -> prefer composition
-  inst_g014  0.15    1    workflow      PR -> add screenshots
-  inst_g015  0.10    1    testing       E2E -> test happy path first
+  ID                       Domain        Trigger Pattern
+  env-vars-never-hardcode  security      api.?key|secret|password|...
+    → "Never hardcode secrets. Use environment variables."
 
   ============================================
-  PROJECT: {current-project} (28 instincts)
+  CONFIRMED (injected when trigger matches)
   ============================================
 
-  [Similar breakdown by lifecycle stage...]
+  ID                       Domain        Trigger Pattern
+  git-commit-conventional  git           git commit|commit message
+    → "Use conventional commits: feat/fix/chore/docs/..."
+
+  error-handling-explicit  code-quality  try|catch|error|exception
+    → "Handle errors explicitly. No silent catches."
+
+  api-auth-check           security      route\.ts|api/
+    → "API routes must validate authentication."
 
   ============================================
-  EVOLUTION READY (4 candidates)
+  DRAFTS (not injected — review with /analyze-session)
   ============================================
-  inst_g004  [0.85] + inst_g005 [0.82] + inst_g008 [0.65]
-    -> Potential cluster: "Deployment Checklist"
-    -> Run /evolve to process
 
-  inst_p001  [0.82]
-    -> Solo candidate: "API Error Handling"
-    -> Run /evolve to process
+  ID          Type              Evidence
+  fix-edit    error_resolution  Edit error resolved — 2026-03-31
+  fix-bash    error_resolution  Bash error resolved — 2026-03-31
+
+  ============================================
+  DOMAIN DEDUP RULES
+  ============================================
+
+  When multiple instincts match the same tool use:
+  - One instinct per domain (permanent > confirmed)
+  - Maximum 3 domains injected simultaneously
+  - Drafts are NEVER auto-injected
 
   ============================================
   Actions:
-  [E] /evolve        -- Process evolution candidates
-  [P] /promote       -- Promote project instincts to global
-  [D] Delete         -- Remove an instinct by ID
+  [A] /analyze-session  -- Review and confirm drafts
+  [E] /evolve           -- Create new instincts or evolve to skills
+  [P] /promote          -- Promote confirmed → permanent
+  [D] Delete            -- Remove an instinct by ID
   [X] Close
 ```

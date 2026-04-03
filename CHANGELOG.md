@@ -1,5 +1,47 @@
 # Changelog
 
+## v4.1.1 — 2026-04-01
+
+### Fixed: Critical — Auto-resume between sessions was broken
+`_project-context.sh` had a stray `break` (line 57) outside the conditional block. If today's EOD summary didn't exist, the loop would exit immediately without checking yesterday's file. The flagship auto-resume feature was completely non-functional.
+
+### Fixed: `/analyze-session` command didn't exist
+README, CHANGELOG, install output, and multiple SKILL.md files all referenced `/analyze-session`, but the actual command file was named `analyze-observations.md`. Renamed to `analyze-session.md` and rewrote content for v4.1 proposals workflow.
+
+### Fixed: `install.bat` parity with `install.sh`
+- Added `_daily-summaries` directory creation (missing — `/eod` would fail on Windows)
+- Added Python 3 detection with warning (was silent)
+- Fixed Node.js path quoting using `process.argv` (paths with spaces would break)
+
+### Fixed: `.last-learn` marker created at install time
+`_session-learner.sh` uses `find -newer .last-learn` which would fail noisily on first run. Installer now creates the marker file.
+
+### Fixed: 11 files referenced non-existent v3.2 paths
+- `_instincts.json` → `_instincts-index.json` (8 files)
+- `_observations.json` → `~/.claude/homunculus/projects/{hash}/observations.jsonl` (3 files)
+- Fixed `skills/homunculus` path → `homunculus` (no `skills/` prefix)
+- Fixed `lastSeen` field reference → v4.1 schema fields
+
+### Fixed: Version and naming inconsistencies
+- Bumped version 3.2 → 4.1 in `_catalog.json`, `_projects.json`, `_operator-state.template.json`
+- Renamed "Synapis" → "Sinapsis" across all `.md` and `.json` files
+- Skill Router header: v3.0 → v4.1
+- `settings.template.json`: corrected hook count 7/Stop(2) → 6/Stop(1)
+
+### Updated: Command and skill files to v4.1 data model
+- Rewrote `synapis-instincts/SKILL.md`: replaced 0.0-1.0 lifecycle model with draft/confirmed/permanent
+- Rewrote `instinct-status.md`: dashboard now shows levels and domain dedup
+- Rewrote `promote.md`: promotes confirmed → permanent (not project → global)
+- Updated `evolve.md`: filter criteria uses levels, not confidence decimals
+
+### Improved: Error detection in `observe_v3.py`
+Replaced substring matching (`"error" in output`) with word-boundary regex patterns. Prevents false positives like "0 errors found" from being flagged as errors.
+
+### Improved: Removed orphan directory creation in `observe_v3.py`
+Removed creation of unused directories (`instincts/personal`, `evolved/skills`, etc.) per project. Only creates the project directory itself.
+
+---
+
 ## v4.1 — 2026-03-31
 
 ### New: Closed Learning Pipeline
@@ -31,7 +73,7 @@ Fields: `id`, `domain`, `level`, `trigger_pattern`, `inject`, `origin`, `added`.
 Origin values: `manual` (curated) or `learned` (from session-learner).
 
 ### New: `core/settings.template.json`
-Documents the 7-hook architecture with comments. Copy/merge into `~/.claude/settings.json`.
+Documents the 6-hook architecture with comments. Copy/merge into `~/.claude/settings.json`.
 
 ### Changed: Honest Observation Model
 v3.2 claimed Sinapsis "observes passively in real-time." This was inaccurate.

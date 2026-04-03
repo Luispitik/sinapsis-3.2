@@ -157,7 +157,7 @@ copy /Y core\_project-context.sh %USERPROFILE%\.claude\skills\
 copy /Y core\_instincts-index.json %USERPROFILE%\.claude\skills\
 ```
 
-**Then update `settings.json`** — see `core/settings.template.json` for the 7-hook configuration. If you already have hooks, merge them rather than overwriting.
+**Then update `settings.json`** — see `core/settings.template.json` for the 6-hook configuration. If you already have hooks, merge them rather than overwriting.
 
 ---
 
@@ -243,7 +243,7 @@ Open Claude Code
 
 ## The Hook Architecture (v4.1)
 
-Sinapsis uses 7 deterministic hooks configured in `settings.json`:
+Sinapsis uses 6 deterministic hooks configured in `settings.json`:
 
 | Hook | Event | Type | Purpose |
 |------|-------|------|---------|
@@ -288,11 +288,11 @@ See `core/settings.template.json` for the exact configuration.
 
 Never lose context between sessions. Run `/eod` before closing Claude:
 
-1. Synapis captures your git activity, open PRs, and learning progress
+1. Sinapsis captures your git activity, open PRs, and learning progress
 2. You add priorities and notes for tomorrow
 3. Next morning, Claude greets you with a summary and asks where to start
 
-No more "what was I doing yesterday?" — Synapis remembers for you.
+No more "what was I doing yesterday?" — Sinapsis remembers for you.
 
 Use `/eod --quick` for a fast auto-generated summary, or `/eod --yesterday` to review your last saved session.
 
