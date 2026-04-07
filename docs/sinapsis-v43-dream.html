@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sinapsis v4.3 — Dream Cycle</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg-dark: #1a1a2e;
+    --bg-sidebar: #16213e;
+    --accent: #0f3460;
+    --highlight: #e94560;
+    --text-light: #e0e0e0;
+    --text-muted: #a0a0b0;
+    --bg-content: #fafafa;
+    --bg-card: #ffffff;
+    --text-dark: #1a1a2e;
+    --text-body: #333340;
+    --border: #e0e0e8;
+    --code-bg: #1e1e2e;
+    --code-text: #c9d1d9;
+    --row-alt: #f4f4f8;
+    --sidebar-width: 280px;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg-content);
+    color: var(--text-body);
+    line-height: 1.65;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    position: fixed;
+    top: 0; left: 0;
+    width: var(--sidebar-width);
+    height: 100vh;
+    background: var(--bg-sidebar);
+    color: var(--text-light);
+    overflow-y: auto;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    border-right: 3px solid var(--highlight);
+  }
+
+  .sidebar-header {
+    padding: 28px 20px 20px;
+    background: var(--bg-dark);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .sidebar-header h1 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.01em;
+  }
+
+  .sidebar-header .version-tag {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 10px;
+    background: var(--highlight);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .sidebar nav { padding: 16px 0; flex: 1; }
+
+  .sidebar nav a {
+    display: block;
+    padding: 9px 20px;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+  }
+
+  .sidebar nav a:hover,
+  .sidebar nav a.active {
+    color: #fff;
+    background: rgba(233, 69, 96, 0.08);
+    border-left-color: var(--highlight);
+  }
+
+  .sidebar nav .nav-section {
+    padding: 18px 20px 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--highlight);
+  }
+
+  /* ── Main content ── */
+  .content {
+    margin-left: var(--sidebar-width);
+    min-height: 100vh;
+  }
+
+  .hero {
+    background: linear-gradient(135deg, var(--bg-dark) 0%, var(--accent) 100%);
+    color: #fff;
+    padding: 64px 48px 56px;
+  }
+
+  .hero h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 10px;
+  }
+
+  .hero .subtitle {
+    font-size: 1.05rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .hero .subtitle em {
+    color: var(--highlight);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .main-body {
+    max-width: 860px;
+    padding: 40px 48px 80px;
+  }
+
+  /* ── Section headings ── */
+  h2 {
+    font-size: 1.55rem;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 48px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--highlight);
+  }
+
+  h3 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--accent);
+    margin: 28px 0 10px;
+  }
+
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 18px 0 6px;
+  }
+
+  p { margin: 10px 0; }
+
+  /* ── Lists ── */
+  ul, ol { margin: 10px 0 10px 24px; }
+  li { margin: 4px 0; }
+
+  /* ── Code ── */
+  code {
+    font-family: "Cascadia Code", "Fira Code", "JetBrains Mono", Consolas, monospace;
+    font-size: 0.85em;
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 2px 6px;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 18px 22px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 14px 0;
+    font-size: 0.82rem;
+    line-height: 1.55;
+    border-left: 4px solid var(--highlight);
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: inherit;
+  }
+
+  /* ── Tables ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 0.88rem;
+  }
+
+  th {
+    background: var(--bg-dark);
+    color: #fff;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tr:nth-child(even) td { background: var(--row-alt); }
+
+  /* ── Cards ── */
+  .module-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px 26px;
+    margin: 18px 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    border-left: 4px solid var(--accent);
+  }
+
+  .module-card h3 { margin-top: 0; }
+
+  .module-card.highlight-card { border-left-color: var(--highlight); }
+
+  /* ── Score badge ── */
+  .score-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+  }
+
+  .score-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .score-excellent { background: #22c55e; }
+  .score-good { background: #3b82f6; }
+  .score-attention { background: #f59e0b; }
+  .score-action { background: var(--highlight); }
+
+  /* ── Action buttons ── */
+  .action-key {
+    display: inline-block;
+    padding: 2px 10px;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 4px;
+    font-family: monospace;
+    font-weight: 700;
+    font-size: 0.85rem;
+    margin-right: 6px;
+  }
+
+  /* ── Info box ── */
+  .info-box {
+    background: rgba(15, 52, 96, 0.06);
+    border: 1px solid rgba(15, 52, 96, 0.15);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+    font-size: 0.9rem;
+  }
+
+  .info-box.warn {
+    background: rgba(233, 69, 96, 0.06);
+    border-color: rgba(233, 69, 96, 0.2);
+  }
+
+  /* ── Formula ── */
+  .formula-box {
+    background: var(--bg-dark);
+    color: var(--text-light);
+    padding: 18px 24px;
+    border-radius: 8px;
+    text-align: center;
+    font-family: monospace;
+    font-size: 0.95rem;
+    margin: 16px 0;
+    letter-spacing: 0.02em;
+  }
+
+  /* ── Footer ── */
+  .footer {
+    margin-left: var(--sidebar-width);
+    background: var(--bg-dark);
+    color: var(--text-muted);
+    text-align: center;
+    padding: 28px 20px;
+    font-size: 0.82rem;
+  }
+
+  /* ── Hamburger menu (mobile) ── */
+  .menu-toggle {
+    display: none;
+    position: fixed;
+    top: 14px; left: 14px;
+    z-index: 200;
+    background: var(--bg-dark);
+    color: #fff;
+    border: none;
+    width: 40px; height: 40px;
+    border-radius: 6px;
+    font-size: 1.3rem;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+
+  .overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 90;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 860px) {
+    .sidebar { transform: translateX(-100%); transition: transform 0.25s ease; }
+    .sidebar.open { transform: translateX(0); }
+    .overlay.open { display: block; }
+    .menu-toggle { display: flex; }
+    .content, .footer { margin-left: 0; }
+    .hero { padding: 48px 24px 40px; }
+    .hero h1 { font-size: 1.7rem; }
+    .main-body { padding: 28px 20px 60px; }
+    pre { font-size: 0.75rem; }
+    table { font-size: 0.8rem; }
+    th, td { padding: 7px 10px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Mobile hamburger -->
+<button class="menu-toggle" onclick="toggleSidebar()" aria-label="Menu">&#9776;</button>
+<div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>Sinapsis</h1>
+    <span class="version-tag">v4.3 Dream Cycle</span>
+  </div>
+  <nav>
+    <div class="nav-section">Concepto</div>
+    <a href="#que-es">Que es el Dream Cycle</a>
+    <a href="#modulos">Los 5 Modulos</a>
+    <div class="nav-section">Uso</div>
+    <a href="#como-usar">Como usar /dream</a>
+    <a href="#health-score">Health Score</a>
+    <a href="#auto-acciones">Auto-acciones</a>
+    <div class="nav-section">Referencia</div>
+    <a href="#ficheros">Ficheros</a>
+    <a href="#integracion">Integracion</a>
+    <a href="#instalacion">Instalacion</a>
+  </nav>
+</aside>
+
+<!-- Content -->
+<div class="content">
+  <div class="hero">
+    <h1>Sinapsis v4.3 &mdash; Dream Cycle</h1>
+    <p class="subtitle">Higiene de indice inspirada en <em>AutoDream de Anthropic</em></p>
+  </div>
+
+  <div class="main-body">
+
+    <!-- ══ Que es ══ -->
+    <h2 id="que-es">Que es el Dream Cycle</h2>
+    <p>
+      El Dream Cycle es un proceso de mantenimiento autonomo para el indice de instincts de Sinapsis.
+      Ejecuta un analisis completo del fichero <code>_instincts-index.json</code> sin consumir un solo
+      token de LLM: todo es <strong>Node.js determinista</strong>.
+    </p>
+    <p>
+      Se inspira en el concepto de AutoDream de Anthropic: un ciclo de "sueno" donde el sistema revisa
+      su propia memoria, identifica problemas y aplica correcciones conservadoras de forma autonoma.
+    </p>
+
+    <div class="info-box">
+      <strong>Principios clave:</strong>
+      <ul>
+        <li>0 tokens de LLM &mdash; solo logica determinista en Node.js</li>
+        <li>5 modulos independientes, cada uno con responsabilidad unica</li>
+        <li>Auto-acciones conservadoras (solo archiva borradores inactivos de 90+ dias)</li>
+        <li>Reporte interactivo con acciones manuales M/A/K para hallazgos no triviales</li>
+        <li>Produce un Health Score de 0 a 100 como metrica de salud del indice</li>
+      </ul>
+    </div>
+
+    <!-- ══ Los 5 Modulos ══ -->
+    <h2 id="modulos">Los 5 Modulos</h2>
+
+    <!-- Duplicados -->
+    <div class="module-card">
+      <h3>1. Duplicados</h3>
+      <p>
+        Detecta pares de instincts cuyo contenido es demasiado similar para coexistir.
+        Utiliza el coeficiente de <strong>Jaccard</strong> con umbral de <strong>0.80</strong>
+        sobre tokens normalizados, ademas de comprobar solapamiento en los arrays de triggers.
+      </p>
+
+      <h4>Que detecta</h4>
+      <ul>
+        <li>Instincts con &ge;80% de tokens compartidos en su contenido</li>
+        <li>Instincts con triggers identicos o subconjuntos del otro</li>
+        <li>Instincts fusionables donde uno es subconjunto semantico del otro</li>
+      </ul>
+
+      <h4>Ejemplo de hallazgo</h4>
+<pre><code>{
+  "type": "duplicate",
+  "pair": ["supabase-rls-always", "supabase-rls-mandatory"],
+  "jaccard": 0.87,
+  "triggerOverlap": 3,
+  "suggestion": "Merge into single instinct"
+}</code></pre>
+    </div>
+
+    <!-- Contradicciones -->
+    <div class="module-card">
+      <h3>2. Contradicciones</h3>
+      <p>
+        Busca instincts que se contradicen entre si escaneando
+        <strong>7 pares de palabras opuestas</strong> en ingles y espanol.
+        Si dos instincts activos contienen terminos opuestos en el mismo dominio,
+        el modulo los marca como conflicto.
+      </p>
+
+      <h4>Pares opuestos detectados (EN + ES)</h4>
+      <table>
+        <thead>
+          <tr><th>Afirmativo</th><th>Negativo</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>always / siempre</td><td>never / nunca</td></tr>
+          <tr><td>require / requerir</td><td>forbid / prohibir</td></tr>
+          <tr><td>enable / activar</td><td>disable / desactivar</td></tr>
+          <tr><td>allow / permitir</td><td>block / bloquear</td></tr>
+          <tr><td>must / debe</td><td>must not / no debe</td></tr>
+          <tr><td>include / incluir</td><td>exclude / excluir</td></tr>
+          <tr><td>use / usar</td><td>avoid / evitar</td></tr>
+        </tbody>
+      </table>
+
+      <h4>Ejemplo de hallazgo</h4>
+<pre><code>{
+  "type": "contradiction",
+  "pair": ["use-docker-always", "avoid-docker-vps"],
+  "opposites": ["always/use", "avoid"],
+  "domain": "docker",
+  "suggestion": "Resolve conflict — one must be archived"
+}</code></pre>
+    </div>
+
+    <!-- Staleness -->
+    <div class="module-card highlight-card">
+      <h3>3. Staleness</h3>
+      <p>
+        Clasifica cada instinct en cuatro categorias de frescura segun su actividad reciente,
+        fecha de creacion y numero de ocurrencias (<code>occurrences</code>).
+      </p>
+
+      <table>
+        <thead>
+          <tr><th>Categoria</th><th>Criterio</th><th>Accion</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>fresh</strong></td>
+            <td>Ultima activacion &lt; 30 dias</td>
+            <td>Ninguna</td>
+          </tr>
+          <tr>
+            <td><strong>stale</strong></td>
+            <td>Ultima activacion 30-89 dias</td>
+            <td>Se reporta, accion manual</td>
+          </tr>
+          <tr>
+            <td><strong>archive_candidate</strong></td>
+            <td>Ultima activacion &ge; 90 dias</td>
+            <td>Se reporta. Auto-archivo si cumple regla</td>
+          </tr>
+          <tr>
+            <td><strong>never_activated</strong></td>
+            <td>0 ocurrencias desde su creacion</td>
+            <td>Se reporta, accion manual</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h4>Regla de auto-archivo</h4>
+      <div class="info-box warn">
+        Solo se auto-archivan instincts que cumplan <strong>las tres condiciones</strong>:
+        <code>confidence === "draft"</code> + <code>occurrences === 0</code> + <code>edad &ge; 90 dias</code>.
+        Todo lo demas requiere decision humana.
+      </div>
+    </div>
+
+    <!-- Validacion de Triggers -->
+    <div class="module-card">
+      <h3>4. Validacion de Triggers</h3>
+      <p>
+        Analiza los arrays de <code>triggers</code> de cada instinct buscando patrones problematicos
+        que podrian causar activaciones incorrectas o excesivas.
+      </p>
+
+      <h4>Que detecta</h4>
+      <ul>
+        <li><strong>Regex invalidas</strong> &mdash; triggers con sintaxis regex rota que crashearian el activator</li>
+        <li><strong>Overly broad</strong> &mdash; triggers demasiado genericos (ej. <code>file</code>, <code>code</code>, <code>error</code>) que matchearian en casi toda sesion</li>
+        <li><strong>Cross-domain</strong> &mdash; triggers de un dominio asignados a un instinct de otro dominio (ej. trigger <code>stripe</code> en un instinct de Supabase)</li>
+      </ul>
+
+      <h4>Ejemplo de hallazgo</h4>
+<pre><code>{
+  "type": "trigger_issue",
+  "instinct": "prisma-json-parse",
+  "trigger": ".*",
+  "issue": "overly_broad",
+  "suggestion": "Replace with specific trigger: prisma, json, schema"
+}</code></pre>
+    </div>
+
+    <!-- Metricas de Salud -->
+    <div class="module-card">
+      <h3>5. Metricas de Salud</h3>
+      <p>
+        Calcula un <strong>Health Score</strong> de 0 a 100 que resume la calidad general del indice.
+        La puntuacion se deriva de penalizaciones sobre un baseline perfecto.
+      </p>
+
+      <h4>Formula</h4>
+      <div class="formula-box">
+        score = 100 - (duplicates * 8) - (contradictions * 12) - (stale * 2) - (archive_candidates * 3) - (trigger_issues * 5)
+      </div>
+
+      <p>El resultado se fija en el rango [0, 100] (nunca negativo).</p>
+
+      <table>
+        <thead>
+          <tr><th>Factor</th><th>Penalizacion</th><th>Razon</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cada par duplicado</td><td>-8</td><td>Ruido y confusion en activacion</td></tr>
+          <tr><td>Cada contradiccion</td><td>-12</td><td>Instrucciones conflictivas, mayor impacto</td></tr>
+          <tr><td>Cada instinct stale</td><td>-2</td><td>Peso muerto ligero</td></tr>
+          <tr><td>Cada archive_candidate</td><td>-3</td><td>Peso muerto significativo</td></tr>
+          <tr><td>Cada trigger issue</td><td>-5</td><td>Activaciones incorrectas</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ══ Como usar ══ -->
+    <h2 id="como-usar">Como usar /dream</h2>
+    <p>
+      El comando <code>/dream</code> ejecuta el Dream Cycle completo y presenta un reporte interactivo.
+    </p>
+
+    <h3>Paso 1: Ejecutar el comando</h3>
+<pre><code>/dream</code></pre>
+    <p>
+      Sinapsis lee <code>_instincts-index.json</code>, ejecuta los 5 modulos secuencialmente
+      y genera el reporte en consola.
+    </p>
+
+    <h3>Paso 2: Revisar el reporte</h3>
+    <p>
+      El reporte muestra primero el Health Score y luego cada hallazgo agrupado por modulo.
+      Cada hallazgo que requiere decision humana presenta tres acciones:
+    </p>
+    <ul>
+      <li><span class="action-key">M</span> <strong>Merge</strong> &mdash; Fusionar dos instincts en uno (para duplicados)</li>
+      <li><span class="action-key">A</span> <strong>Archive</strong> &mdash; Mover el instinct al archivo (<code>_archived/</code>)</li>
+      <li><span class="action-key">K</span> <strong>Keep</strong> &mdash; Mantener sin cambios (descarta el hallazgo)</li>
+    </ul>
+
+    <h3>Paso 3: Aplicar decisiones</h3>
+    <p>
+      El sistema aplica las decisiones de forma atomica: primero todas las fusiones,
+      luego todos los archivados. Si hay un error, se revierte al estado previo.
+    </p>
+
+    <h3>Paso 4: Verificar resultado</h3>
+    <p>
+      Tras aplicar los cambios, <code>/dream</code> re-ejecuta el scoring y muestra
+      el nuevo Health Score comparado con el anterior.
+    </p>
+
+<pre><code>$ /dream
+
+=== SINAPSIS DREAM CYCLE ===
+
+Health Score: 82/100 (good)
+  Duplicates:      1 pair  (-8)
+  Contradictions:  0       (-0)
+  Stale:           3       (-6)
+  Archive cand.:   1       (-3)
+  Trigger issues:  0       (-0)
+  Auto-archived:   1 (draft, 0 occ, 94 days)
+
+[1] DUPLICATE: supabase-rls-always + supabase-rls-mandatory (J=0.87)
+    [M]erge  [A]rchive one  [K]eep both
+
+[2] STALE: docker-compose-pattern (68 days, 0 occ)
+    [A]rchive  [K]eep
+
+...</code></pre>
+
+    <!-- ══ Health Score ══ -->
+    <h2 id="health-score">Health Score</h2>
+    <p>Guia de interpretacion del Health Score:</p>
+
+    <div class="score-row">
+      <span class="score-badge score-excellent">95</span>
+      <div>
+        <strong>90 &ndash; 100: Excelente</strong><br>
+        El indice esta limpio. No se requiere ninguna accion. El Dream Cycle
+        puede programarse a intervalos largos (semanal o quincenal).
+      </div>
+    </div>
+
+    <div class="score-row">
+      <span class="score-badge score-good">78</span>
+      <div>
+        <strong>70 &ndash; 89: Bueno</strong><br>
+        Hay algunos hallazgos menores. Revisar los reportes y decidir sobre
+        los stale y triggers problematicos. El sistema funciona correctamente.
+      </div>
+    </div>
+
+    <div class="score-row">
+      <span class="score-badge score-attention">58</span>
+      <div>
+        <strong>50 &ndash; 69: Requiere atencion</strong><br>
+        Hay duplicados o contradicciones activas que estan degradando la calidad
+        de las activaciones. Se recomienda ejecutar <code>/dream</code> y resolver
+        los hallazgos antes de continuar trabajando.
+      </div>
+    </div>
+
+    <div class="score-row">
+      <span class="score-badge score-action">32</span>
+      <div>
+        <strong>&lt; 50: Accion requerida</strong><br>
+        El indice tiene problemas serios. Hay multiples contradicciones o una
+        acumulacion significativa de instincts sin activar. Ejecutar <code>/dream</code>
+        inmediatamente y dedicar tiempo a limpiar el indice.
+      </div>
+    </div>
+
+    <!-- ══ Auto-acciones ══ -->
+    <h2 id="auto-acciones">Auto-acciones</h2>
+    <p>
+      El Dream Cycle aplica <strong>una unica auto-accion</strong>, disenada para ser
+      lo mas conservadora posible:
+    </p>
+
+    <div class="module-card highlight-card">
+      <h3>Auto-archivo de borradores inactivos</h3>
+      <p>Un instinct se auto-archiva <strong>solo si cumple las tres condiciones simultaneamente</strong>:</p>
+      <ol>
+        <li><code>confidence === "draft"</code> &mdash; Nunca se ha promovido a confirmed o permanent</li>
+        <li><code>occurrences === 0</code> &mdash; Nunca ha sido activado por el instinct-activator</li>
+        <li><strong>Edad &ge; 90 dias</strong> &mdash; Lleva al menos 90 dias en el indice sin actividad</li>
+      </ol>
+      <p>
+        La logica es simple: si un instinct fue creado como borrador, nunca se activo en 90 dias
+        y nunca fue promovido manualmente, es casi seguro que no aporta valor al indice.
+        Archivarlo libera ruido sin riesgo de perder conocimiento validado.
+      </p>
+      <p>
+        Los instincts archivados no se eliminan &mdash; se mueven a <code>_archived/</code> y pueden
+        recuperarse con <code>/instinct-import</code> si fuera necesario.
+      </p>
+    </div>
+
+    <div class="info-box">
+      <strong>Por que solo esta regla?</strong> Cualquier otra auto-accion (fusionar duplicados,
+      resolver contradicciones, archivar instincts con ocurrencias) requiere juicio semantico
+      que solo el operador puede hacer. El Dream Cycle es determinista: no adivina, no infiere,
+      no usa LLM.
+    </div>
+
+    <!-- ══ Ficheros ══ -->
+    <h2 id="ficheros">Ficheros</h2>
+    <p>Ficheros leidos y escritos por el Dream Cycle:</p>
+
+    <table>
+      <thead>
+        <tr><th>Fichero</th><th>Operacion</th><th>Descripcion</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>_instincts-index.json</code></td>
+          <td>Lectura + Escritura</td>
+          <td>Indice principal de instincts. Se lee para analisis y se escribe si hay auto-archivados o merges</td>
+        </tr>
+        <tr>
+          <td><code>_archived/</code></td>
+          <td>Escritura</td>
+          <td>Directorio donde se mueven los instincts archivados (auto o manual)</td>
+        </tr>
+        <tr>
+          <td><code>_dream-report.json</code></td>
+          <td>Escritura</td>
+          <td>Ultimo reporte completo del Dream Cycle en formato JSON para consumo programatico</td>
+        </tr>
+        <tr>
+          <td><code>_dream-log.jsonl</code></td>
+          <td>Append</td>
+          <td>Log historico de ejecuciones. Cada linea es un JSON con timestamp, score y resumen de acciones</td>
+        </tr>
+        <tr>
+          <td><code>_knowledge-index.md</code></td>
+          <td>Lectura</td>
+          <td>Se lee como contexto opcional si existe (producido por el linting diario Karpathy)</td>
+        </tr>
+        <tr>
+          <td><code>config.json</code></td>
+          <td>No usado</td>
+          <td>Eliminado en v4.0 &mdash; el Dream Cycle no tiene configuracion externa</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ══ Integracion ══ -->
+    <h2 id="integracion">Integracion</h2>
+    <p>
+      El Dream Cycle <strong>no es un hook</strong>. No se ejecuta automaticamente al abrir o cerrar
+      sesion. Es un proceso independiente que se invoca de dos formas:
+    </p>
+
+    <h3>On-demand</h3>
+    <p>
+      El operador ejecuta <code>/dream</code> cuando quiere revisar la salud del indice.
+      Tipicamente despues de una sesion intensa de aprendizaje o cuando el
+      <code>/instinct-status</code> muestra demasiados instincts en draft.
+    </p>
+
+    <h3>Programado (scheduled task)</h3>
+    <p>
+      Puede configurarse como tarea programada via el sistema de scheduled tasks de Claude Code.
+      La frecuencia recomendada depende del ritmo de aprendizaje:
+    </p>
+
+    <table>
+      <thead>
+        <tr><th>Ritmo de uso</th><th>Frecuencia recomendada</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Uso diario intenso (5+ sesiones/dia)</td><td>Diario</td></tr>
+        <tr><td>Uso moderado (1-3 sesiones/dia)</td><td>Semanal</td></tr>
+        <tr><td>Uso esporadico</td><td>Quincenal o manual</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Pipeline de Sinapsis</h3>
+    <p>
+      El Dream Cycle complementa el pipeline existente sin interferir:
+    </p>
+<pre><code>Session hooks (v4.0+):
+  _session-learner.sh  -->  observe  -->  propose
+  _instinct-activator.sh  -->  match triggers  -->  inject systemMessage
+
+Mantenimiento (v4.2+):
+  sinapsis-linting (scheduled)  -->  _knowledge-index.md
+  /analyze-observations  -->  reads knowledge-index
+
+Higiene (v4.3):
+  /dream  -->  5 modulos  -->  reporte interactivo  -->  auto-acciones conservadoras</code></pre>
+
+    <!-- ══ Instalacion ══ -->
+    <h2 id="instalacion">Instalacion</h2>
+    <p>
+      El Dream Cycle se instala automaticamente con <code>install.sh</code> de Sinapsis.
+      No requiere pasos adicionales.
+    </p>
+
+<pre><code># Instalacion completa de Sinapsis (incluye Dream Cycle)
+curl -fsSL https://raw.githubusercontent.com/Luispitik/sinapsis-3.2/main/install.sh | bash</code></pre>
+
+    <p>
+      El instalador registra el comando <code>/dream</code> en el directorio de commands
+      del proyecto y copia el modulo Node.js <code>_dream-cycle.js</code> al directorio core.
+    </p>
+
+    <h3>Verificar la instalacion</h3>
+<pre><code># Verificar que /dream esta disponible
+ls .claude/commands/dream.md
+
+# Ejecutar un Dream Cycle de prueba
+/dream</code></pre>
+
+    <div class="info-box">
+      <strong>Requisitos:</strong> Node.js 18+ (para las funciones de analisis determinista).
+      No requiere dependencias externas &mdash; todo el codigo usa modulos nativos de Node.js.
+    </div>
+
+  </div><!-- .main-body -->
+</div><!-- .content -->
+
+<!-- Footer -->
+<div class="footer">
+  Sinapsis v4.3.0 &mdash; NorteIA | SalgadoIA | Abril 2026
+</div>
+
+<script>
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('overlay').classList.toggle('open');
+}
+
+// Close sidebar on nav click (mobile)
+document.querySelectorAll('.sidebar nav a').forEach(function(link) {
+  link.addEventListener('click', function() {
+    if (window.innerWidth <= 860) {
+      document.getElementById('sidebar').classList.remove('open');
+      document.getElementById('overlay').classList.remove('open');
+    }
+  });
+});
+
+// Highlight active section in sidebar on scroll
+(function() {
+  var sections = document.querySelectorAll('h2[id]');
+  var links = document.querySelectorAll('.sidebar nav a[href^="#"]');
+
+  function onScroll() {
+    var scrollPos = window.scrollY + 120;
+    var current = '';
+    sections.forEach(function(section) {
+      if (section.offsetTop <= scrollPos) {
+        current = '#' + section.id;
+      }
+    });
+    links.forEach(function(link) {
+      link.classList.toggle('active', link.getAttribute('href') === current);
+    });
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+</body>
+</html>

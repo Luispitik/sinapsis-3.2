@@ -16,6 +16,7 @@ PostToolUse → observe.sh post  (async) — logs tool output + is_error flag
 PreToolUse  → _project-context.sh (sync, once/session) — injects last context.md
 PreToolUse  → _instinct-activator.sh (sync) — injects matched instincts
 Stop        → _session-learner.sh — writes context.md + detects error patterns
+On-demand   → _dream.sh — 5-module index hygiene (duplicates, contradictions, staleness, triggers, health)
 ```
 
 **What fires automatically:** passive rules, instinct injection, observation logging, context.md writing.
@@ -143,3 +144,4 @@ When instincts cluster around a theme, `/evolve` lets you promote them:
 | `/evolve` | Promote mature instincts to skills/commands/rules |
 | `/promote` | Move instinct from project scope to global |
 | `/passive-status` | Which passive rules fire most, which never triggered |
+| `/dream` | Run dream cycle: 5-module index hygiene with merge/archive actions |

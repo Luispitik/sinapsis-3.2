@@ -1,5 +1,32 @@
 # Changelog
 
+## v4.3.0 (2026-04-08)
+
+### Added
+- **Dream Cycle** (`core/_dream.sh`): 5-module index hygiene system inspired by Anthropic's AutoDream
+  - Module 1: Duplicate detection (Jaccard word tokens, threshold 0.80)
+  - Module 2: Contradiction detection (7 opposing keyword pairs, EN+ES)
+  - Module 3: Staleness scoring (fresh/stale/archive_candidate/never_activated)
+  - Module 4: Trigger pattern validation (regex validity, overly broad, cross-domain overlap)
+  - Module 5: Index health metrics and score (0-100)
+- `/dream` command (`commands/dream.md`): Interactive dream cycle with merge/archive actions
+- Auto-archive: drafts with 0 occurrences and >90 days old
+- `archived` array in `_instincts-index.json` for non-destructive archival
+- `_dream-report.md`: Human-readable report with executive summary and findings
+- `_dream.log`: Audit trail for dream cycle actions
+- Lock file (`_dream.lock`) with 1-hour stale detection
+
+### Tests
+- 25 TDD unit tests (`tests/test-dream.sh`)
+- 15 E2E integration tests (`tests/test-e2e-dream.sh`)
+- Total: 40 new tests (was 78, now 118)
+
+### Improved
+- Health score formula now penalizes `never_activated` instincts (-5 each)
+- Empty index generates minimal report instead of silently exiting
+
+---
+
 ## v4.2.2 — 2026-04-06
 
 ### Added

@@ -1,4 +1,4 @@
-# Sinapsis v4.2.2
+# Sinapsis v4.3.0
 
 ### The skill system for Claude Code that learns and adapts to you.
 
@@ -23,7 +23,15 @@ Think of it as going from a dumb terminal to an assistant that actually knows yo
 
 ---
 
-## What's New in v4.2
+## What's New in v4.3
+
+### Dream Cycle (`/dream`)
+
+v4.3 introduces the **Dream Cycle** -- a 5-module index hygiene system inspired by Anthropic's AutoDream. Run `/dream` to analyze your instinct index for duplicates, contradictions, stale entries, invalid triggers, and overall health. The cycle produces a scored report (0-100) and offers interactive merge/archive actions. Drafts with 0 occurrences and >90 days old are auto-archived to a new `archived` array in `_instincts-index.json` (non-destructive -- recoverable anytime).
+
+The 5 modules: (1) Duplicate detection via Jaccard word tokens, (2) Contradiction detection with 7 opposing keyword pairs in EN+ES, (3) Staleness scoring, (4) Trigger pattern validation, (5) Index health metrics. Lock file prevents concurrent runs. 40 new tests (25 TDD + 15 E2E), bringing the total from 78 to 118.
+
+### Previous: v4.2
 
 | Feature | Description |
 |---------|-------------|
@@ -32,9 +40,9 @@ Think of it as going from a dumb terminal to an assistant that actually knows yo
 | **Multi-project /eod** | `_eod-gather.sh` scans ALL projects worked today, not just the current one. |
 | **Domain pre-filter** | Reads project stack from `context.md`, skips irrelevant instincts before regex matching. |
 | **Occurrences tiebreaker** | Same domain + same level? Higher occurrences wins in dedup. |
-| **78 tests** | 21 unit + 12 TDD + 25 E2E + 20 security. Pipeline tested end-to-end in sandbox. |
+| **118 tests** | 21 unit + 12 TDD + 25 E2E + 20 security + 40 dream. |
 
-See [CHANGELOG.md](CHANGELOG.md) for full details, including v4.1 → v4.2 changes.
+See [CHANGELOG.md](CHANGELOG.md) for full details.
 
 ---
 
@@ -283,6 +291,7 @@ See `core/settings.template.json` for the exact configuration.
 | `/promote` | Move instinct from project scope to global |
 | `/projects` | List all known projects with stats |
 | `/eod` | Save work context for tomorrow's session |
+| `/dream` | Run dream cycle: index hygiene with 5-module analysis |
 
 ### Session Continuity (`/eod`)
 
@@ -317,6 +326,8 @@ Use `/eod --quick` for a fast auto-generated summary, or `/eod --yesterday` to r
     _instinct-proposals.json   <-- Draft proposals from session-learner
     _project-context.sh        <-- Hook: injects project context (once/session)
     _session-learner.sh        <-- Stop hook: writes context + detects patterns
+    _dream.sh                  <-- Dream cycle: 5-module index hygiene
+    _dream-report.md           <-- Last dream cycle report
     _operator-state.json       <-- Your identity + decisions (cross-project)
     _projects.json             <-- Project registry
   commands/                    <-- Slash commands (/evolve, /clone, etc.)
