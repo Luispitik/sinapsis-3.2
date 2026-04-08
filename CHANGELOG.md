@@ -1,26 +1,5 @@
 # Changelog
 
-## v5.0-alpha (2026-04-08)
-
-### Added — Multi-Agent Reflection Layer
-- **Reflection Orchestrator** (`core/_reflection-orchestrator.sh`): Deterministic decision engine
-  - Reads proposals, counts unclassified, decides Scout/Analyst invocation
-  - Budget enforcement via `_agent-budget.json` (daily limits per agent tier)
-  - Audit trail in `_reflection-log.jsonl`
-- **Knowledge Graph template** (`core/_knowledge-graph.json`): Instinct relationships
-- **Agent Budget template** (`core/_agent-budget.json`): Cost tracking per agent
-- **Proposals v2 template** (`core/_instinct-proposals.json`): Extended schema for Scout/Analyst fields
-- **Architecture design doc** (`docs/ARCHITECTURE-v5-multi-agent.md`): Full design for 3-agent system
-
-### Tests
-- 16 TDD tests for reflection orchestrator (`tests/test-reflection-orchestrator.sh`)
-
-### Note
-- Agent prompt files (`_agent-scout.prompt.md`, `_agent-analyst.prompt.md`) not yet created — Phase 2
-- Architect agent not yet implemented — Phase 4
-
----
-
 ## v4.3.1 (2026-04-08)
 
 ### Fixed — Fersora Audit (22 bugs + 6 vulnerabilities)

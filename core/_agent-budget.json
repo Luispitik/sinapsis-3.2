@@ -1,9 +1,0 @@
-{
-  "version": "1.0",
-  "daily_limits": {
-    "scout": { "max_calls": 50, "max_tokens": 100000 },
-    "analyst": { "max_calls": 10, "max_tokens": 500000 },
-    "architect": { "max_calls": 1, "max_tokens": 200000 }
-  },
-  "usage": {}
-}
