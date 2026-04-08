@@ -9,6 +9,10 @@ description: >
 
 # Session End — Documentación automática de sesión
 
+> **Nota**: Este comando extiende `/eod`. Primero ejecuta el flujo EOD (save daily summary),
+> luego añade el session log detallado y actualiza MEMORY.md si procede.
+> Para solo guardar el contexto multi-proyecto sin session log, usa `/eod` directamente.
+
 Al ejecutar este comando, haz lo siguiente SIN preguntar:
 
 ## 1. Generar resumen de sesión

@@ -3,7 +3,7 @@ chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 :: ============================================================
-::  Sinapsis v4.1 — Installer for Windows
+::  Sinapsis v4.3.1 — Installer for Windows
 ::  Skills on Demand for Claude Code
 ::  https://github.com/Luispitik/sinapsis-3.2
 :: ============================================================
@@ -18,7 +18,7 @@ set "SCRIPT_DIR=%~dp0"
 
 echo.
 echo ============================================================
-echo   Sinapsis v4.1 -- Skills on Demand for Claude Code
+echo   Sinapsis v4.3.1 -- Skills on Demand for Claude Code
 echo   The system that learns and adapts to you
 echo ============================================================
 echo.
@@ -42,7 +42,7 @@ if %errorlevel% neq 0 (
 where node >nul 2>&1
 if %errorlevel% neq 0 (
     echo   ERROR: Node.js not found.
-    echo          Sinapsis v4.1 hooks require Node.js.
+    echo          Sinapsis v4.3.1 hooks require Node.js.
     echo          Install it: https://nodejs.org
     pause
     exit /b 1
@@ -101,10 +101,27 @@ echo   OK Directories created
 :: Step 4: Copy core config files
 echo [4/8] Installing core config files...
 
+:: Parse --force-update flag
+set "FORCE_UPDATE=false"
+for %%a in (%*) do (
+    if "%%a"=="--force-update" set "FORCE_UPDATE=true"
+)
+
+:: Catalog always updates (system file, not user data)
 copy /Y "%SCRIPT_DIR%core\_catalog.json" "%SKILLS_DIR%\_catalog.json" >nul
-copy /Y "%SCRIPT_DIR%core\_passive-rules.json" "%SKILLS_DIR%\_passive-rules.json" >nul
-copy /Y "%SCRIPT_DIR%core\_projects.json" "%SKILLS_DIR%\_projects.json" >nul
-copy /Y "%SCRIPT_DIR%core\_instincts-index.json" "%SKILLS_DIR%\_instincts-index.json" >nul
+
+:: User data files: preserve on upgrade, only create if missing
+:: Bug #9 fix: unconditional copy destroyed learned instincts, custom rules, and project registry
+for %%f in (_passive-rules.json _projects.json _instincts-index.json) do (
+    if "!FORCE_UPDATE!"=="true" (
+        copy /Y "%SCRIPT_DIR%core\%%f" "%SKILLS_DIR%\%%f" >nul
+        echo   !  %%f force-updated (--force-update^)
+    ) else if not exist "%SKILLS_DIR%\%%f" (
+        copy /Y "%SCRIPT_DIR%core\%%f" "%SKILLS_DIR%\%%f" >nul
+    ) else (
+        echo   -- %%f preserved (user data^)
+    )
+)
 
 if not exist "%SKILLS_DIR%\_operator-state.json" (
     copy /Y "%SCRIPT_DIR%core\_operator-state.template.json" "%SKILLS_DIR%\_operator-state.json" >nul
@@ -130,8 +147,10 @@ copy /Y "%SCRIPT_DIR%core\_passive-activator.sh" "%SKILLS_DIR%\_passive-activato
 copy /Y "%SCRIPT_DIR%core\_instinct-activator.sh" "%SKILLS_DIR%\_instinct-activator.sh" >nul
 copy /Y "%SCRIPT_DIR%core\_session-learner.sh" "%SKILLS_DIR%\_session-learner.sh" >nul
 copy /Y "%SCRIPT_DIR%core\_project-context.sh" "%SKILLS_DIR%\_project-context.sh" >nul
+copy /Y "%SCRIPT_DIR%core\_eod-gather.sh" "%SKILLS_DIR%\_eod-gather.sh" >nul
+copy /Y "%SCRIPT_DIR%core\_dream.sh" "%SKILLS_DIR%\_dream.sh" >nul
 
-echo   OK 4 hook scripts installed
+echo   OK 5 hook scripts + dream cycle installed
 echo   NOTE: On Windows, hooks run via Git Bash or WSL. See README for details.
 
 :: Step 6: Configure settings.json
@@ -140,7 +159,7 @@ echo [6/8] Configuring hooks in settings.json...
 if not exist "%CLAUDE_HOME%\settings.json" (
     node -e "var fs=require('fs'),p1=process.argv[1],p2=process.argv[2];var t=JSON.parse(fs.readFileSync(p1,'utf8'));function s(o){if(Array.isArray(o))return o.map(s);if(typeof o==='object'&&o!==null){var r={};for(var k in o){if(k[0]==='_')continue;r[k]=s(o[k]);}return r;}return o;}fs.writeFileSync(p2,JSON.stringify(s(t),null,2));" "%SCRIPT_DIR%core\settings.template.json" "%CLAUDE_HOME%\settings.json" >nul 2>&1
     if %errorlevel% equ 0 (
-        echo   OK settings.json created with v4.1 hooks
+        echo   OK settings.json created with v4.3.1 hooks
     ) else (
         echo   ! Could not auto-create settings.json
         echo     Copy core\settings.template.json to %CLAUDE_HOME%\settings.json manually
@@ -176,9 +195,9 @@ echo   OK %cmd_count% commands installed
 echo.
 echo ============================================================
 if "%UPGRADING%"=="true" (
-    echo   Sinapsis v4.1 upgrade complete!
+    echo   Sinapsis v4.3.1 upgrade complete!
 ) else (
-    echo   Sinapsis v4.1 installed!
+    echo   Sinapsis v4.3.1 installed!
 )
 echo ============================================================
 echo.
@@ -186,7 +205,7 @@ echo   What was installed:
 echo   - 2 global skills (skill-router + sinapsis-learning)
 echo   - %skill_count% total skills
 echo   - %cmd_count% slash commands (/evolve, /clone, /system-status...)
-echo   - 4 hook scripts (passive-activator, instinct-activator, session-learner, project-context)
+echo   - 5 hook scripts + dream cycle (passive-activator, instinct-activator, session-learner, project-context, eod-gather, dream)
 echo   - Core config: catalog, passive rules, instincts index, operator state
 echo.
 echo   Next step:
@@ -199,6 +218,7 @@ echo   /system-status    -- System dashboard
 echo   /evolve           -- Evolve patterns into skills
 echo   /analyze-session  -- Review learned proposals
 echo   /passive-status   -- Active passive rules
+echo   /eod              -- Save context for tomorrow
 echo.
 echo   Windows note: hooks require Node.js. Git Bash recommended for .sh scripts.
 echo   See README for WSL/Git Bash configuration details.

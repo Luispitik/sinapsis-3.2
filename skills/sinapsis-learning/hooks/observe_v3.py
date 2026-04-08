@@ -4,7 +4,7 @@ Appends one JSONL observation per tool use to homunculus/projects/{hash}/observa
 Scrubs secrets from input/output before writing.
 Sets is_error=True when output contains error keywords (used by session-learner)."""
 
-import json, sys, os, re, hashlib
+import json, sys, os, re, hashlib, fcntl, stat
 from datetime import datetime, timezone
 
 
@@ -80,21 +80,31 @@ def main():
     input_str = json.dumps(tool_input)[:5000] if isinstance(tool_input, dict) else str(tool_input)[:5000]
     output_str = json.dumps(tool_output)[:5000] if isinstance(tool_output, dict) else str(tool_output)[:5000]
 
-    # Scrub secrets
+    # Scrub secrets — 5 patterns (v4.3.1: added JWT, GitHub, AWS, PEM)
     SECRET_RE = re.compile(
         r"(?i)(api[_-]?key|token|secret|password|authorization|credentials?|auth)"
         r"([\"'\s:=]+)"
         r"([A-Za-z]+\s+)?"
         r"([A-Za-z0-9_\-/.+=]{8,})"
     )
+    JWT_RE = re.compile(r"eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}")
+    GITHUB_RE = re.compile(r"gh[ps]_[A-Za-z0-9]{36,}")
+    AWS_RE = re.compile(r"AKIA[A-Z0-9]{16}")
+    PEM_RE = re.compile(r"-----BEGIN [A-Z ]+-----[\s\S]*?-----END [A-Z ]+-----")
 
     def scrub(val):
         if val is None:
             return None
-        return SECRET_RE.sub(
+        s = str(val)
+        s = SECRET_RE.sub(
             lambda m: m.group(1) + m.group(2) + (m.group(3) or "") + "[REDACTED]",
-            str(val)
+            s
         )
+        s = JWT_RE.sub("[JWT_REDACTED]", s)
+        s = GITHUB_RE.sub("[GITHUB_TOKEN_REDACTED]", s)
+        s = AWS_RE.sub("[AWS_KEY_REDACTED]", s)
+        s = PEM_RE.sub("[PEM_REDACTED]", s)
+        return s
 
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     observation = {
@@ -124,20 +134,36 @@ def main():
 
     obs_file = os.path.join(project_dir, "observations.jsonl")
 
-    # Auto-archive if file exceeds 10MB
+    # Auto-archive if file exceeds 10MB (with lock to prevent concurrent rotation)
     if os.path.exists(obs_file):
         try:
             if os.path.getsize(obs_file) >= 10 * 1024 * 1024:
-                archive_dir = os.path.join(project_dir, "observations.archive")
-                os.makedirs(archive_dir, exist_ok=True)
-                archive_name = "observations-" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".jsonl"
-                os.rename(obs_file, os.path.join(archive_dir, archive_name))
+                lock_path = obs_file + ".lock"
+                try:
+                    lock_fd = open(lock_path, "w")
+                    fcntl.flock(lock_fd.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    if os.path.exists(obs_file) and os.path.getsize(obs_file) >= 10 * 1024 * 1024:
+                        archive_dir = os.path.join(project_dir, "observations.archive")
+                        os.makedirs(archive_dir, exist_ok=True)
+                        archive_name = "observations-" + datetime.now().strftime("%Y%m%d-%H%M%S") + ".jsonl"
+                        os.rename(obs_file, os.path.join(archive_dir, archive_name))
+                    fcntl.flock(lock_fd.fileno(), fcntl.LOCK_UN)
+                    lock_fd.close()
+                except (IOError, OSError):
+                    pass
         except Exception:
             pass
 
     try:
         with open(obs_file, "a", encoding="utf-8") as f:
+            fcntl.flock(f.fileno(), fcntl.LOCK_EX)
             f.write(json.dumps(observation) + "\n")
+            fcntl.flock(f.fileno(), fcntl.LOCK_UN)
+        # v4.3.1: restrictive permissions on data files (#5D)
+        try:
+            os.chmod(obs_file, stat.S_IRUSR | stat.S_IWUSR)
+        except Exception:
+            pass
     except Exception:
         pass
 

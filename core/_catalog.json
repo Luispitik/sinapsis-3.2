@@ -1,7 +1,7 @@
 {
-  "version": "4.1",
+  "version": "4.3.1",
   "system": "sinapsis",
-  "lastUpdated": "",
+  "lastUpdated": "2026-04-08",
   "globalSkills": [
     {
       "id": "skill-router",
@@ -9,42 +9,52 @@
       "description": "Orquesta skills: launcher, picker, catalogo, instalacion por proyecto",
       "type": "global",
       "status": "active",
-      "tokens_estimate": 800
+      "tokens_estimate": 4150,
+      "chars": 16596,
+      "measured": "2026-04-08"
     },
     {
-      "id": "synapis-learning",
+      "id": "sinapsis-learning",
       "name": "Sinapsis Learning",
-      "description": "Aprendizaje continuo: observa patrones, captura instincts, confidence scoring",
+      "description": "Aprendizaje continuo: observa patrones, captura instincts, lifecycle",
       "type": "global",
       "status": "active",
-      "tokens_estimate": 600
+      "tokens_estimate": 1250,
+      "chars": 4973,
+      "measured": "2026-04-08"
     },
     {
-      "id": "synapis-instincts",
+      "id": "sinapsis-instincts",
       "name": "Sinapsis Instincts",
       "description": "Base de conocimiento con reglas aprendidas de proyectos anteriores",
       "type": "global",
       "status": "active",
-      "tokens_estimate": 400
+      "tokens_estimate": 1515,
+      "chars": 6058,
+      "measured": "2026-04-08"
     },
     {
-      "id": "synapis-researcher",
+      "id": "sinapsis-researcher",
       "name": "Deep Researcher",
       "description": "Investigacion profunda con web search, multiples fuentes y sintesis",
       "type": "global",
       "status": "active",
-      "tokens_estimate": 500
+      "tokens_estimate": 1486,
+      "chars": 5943,
+      "measured": "2026-04-08"
     },
     {
-      "id": "synapis-optimizer",
+      "id": "sinapsis-optimizer",
       "name": "Context Optimizer",
       "description": "Optimiza uso de contexto, detecta desperdicio, sugiere limpieza",
       "type": "global",
       "status": "active",
-      "tokens_estimate": 400
+      "tokens_estimate": 1594,
+      "chars": 6376,
+      "measured": "2026-04-08"
     }
   ],
   "librarySkills": [],
-  "totalTokensGlobal": 2700,
-  "note": "Library skills se anaden automaticamente al instalar desde _library/"
+  "totalTokensGlobal": 9995,
+  "note": "Token estimates measured 2026-04-08 using chars/4 approximation. Library skills se anaden automaticamente al instalar desde _library/"
 }

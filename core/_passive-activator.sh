@@ -7,6 +7,10 @@
 RULES="$HOME/.claude/skills/_passive-rules.json"
 [ ! -f "$RULES" ] && exit 0
 
+if [ "${SINAPSIS_DEBUG:-}" = "1" ]; then
+  exec 2>>"$HOME/.claude/skills/_sinapsis-debug.log"
+fi
+
 node -e '
 const fs = require("fs");
 
@@ -43,6 +47,8 @@ process.stdin.on("end", () => {
       continue;
     }
     try {
+      // v4.3.1: ReDoS protection — reject patterns with nested quantifiers
+      if (/(\+|\*|\{)\)?(\+|\*|\{)/.test(rule.trigger)) continue;
       if (new RegExp(rule.trigger, "i").test(context)) {
         matched.push(rule.inject);
       }

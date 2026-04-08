@@ -10,9 +10,11 @@ INDEX_FILE="$HOME/.claude/skills/_instincts-index.json"
 REPORT_FILE="$HOME/.claude/skills/_dream-report.md"
 LOCK_FILE="$HOME/.claude/skills/_dream.lock"
 LOG_FILE="$HOME/.claude/skills/_dream.log"
-KNOWLEDGE_FILE="$HOME/.claude/skills/_knowledge-index.md"
-
 [ ! -f "$INDEX_FILE" ] && exit 0
+
+if [ "${SINAPSIS_DEBUG:-}" = "1" ]; then
+  exec 2>>"$HOME/.claude/skills/_sinapsis-debug.log"
+fi
 
 node -e '
 const fs = require("fs");
@@ -23,7 +25,7 @@ const INDEX_FILE = process.argv[1];
 const REPORT_FILE = process.argv[2];
 const LOCK_FILE = process.argv[3];
 const LOG_FILE = process.argv[4];
-const KNOWLEDGE_FILE = process.argv[5];
+// KNOWLEDGE_FILE removed in v4.3.1 (was dead code — Bug #19)
 
 // ── LOCK ──────────────────────────────────────────────────────────────────────
 try {
@@ -69,7 +71,7 @@ const isoNow = now.toISOString();
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function tokenize(text) {
   if (!text || typeof text !== "string") return new Set();
-  return new Set(text.toLowerCase().replace(/[^a-z0-9\u00e0-\u00ff ]/g, " ").split(/\s+/).filter(w => w.length > 2));
+  return new Set(text.toLowerCase().replace(/[^\p{L}\p{N} ]/gu, " ").split(/\s+/).filter(w => w.length > 2));
 }
 
 function jaccard(setA, setB) {
@@ -145,7 +147,7 @@ const opposingPairs = [
   { a: /\bskip\b/i,     b: /\brequire\b/i,  label: "skip_vs_require" },
   { a: /\bavoid\b/i,    b: /\buse\b/i,      label: "avoid_vs_use" },
   { a: /\bevitar\b/i,   b: /\busar\b/i,     label: "evitar_vs_usar" },
-  { a: /\bdon[\u2019\u0027]?t\b/i, b: /\bdo\b/i, label: "dont_vs_do" },
+  { a: /\bdon[\u2019\u0027]?t\b/i, b: /\bdo (?:use|require|add|apply|enable)\b/i, label: "dont_vs_do" },
   { a: /^No /m,         b: null,             label: "no_prefix_vs_positive" }
 ];
 
@@ -494,6 +496,6 @@ try {
   // ── UNLOCK ──────────────────────────────────────────────────────────────────
   try { fs.unlinkSync(LOCK_FILE); } catch (e) {}
 }
-' "$INDEX_FILE" "$REPORT_FILE" "$LOCK_FILE" "$LOG_FILE" "$KNOWLEDGE_FILE" 2>/dev/null
+' "$INDEX_FILE" "$REPORT_FILE" "$LOCK_FILE" "$LOG_FILE" 2>/dev/null
 
 exit 0

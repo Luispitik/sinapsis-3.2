@@ -7,12 +7,17 @@
 # NO LLM. Pure deterministic Node.js.
 
 HOMUNCULUS="$HOME/.claude/homunculus"
+
+if [ "${SINAPSIS_DEBUG:-}" = "1" ]; then
+  exec 2>>"$HOME/.claude/skills/_sinapsis-debug.log"
+fi
+
 [ ! -d "$HOMUNCULUS/projects" ] && echo '{"date":"'$(date -u +%Y-%m-%d)'","project_count":0,"projects":[]}' && exit 0
 
 node -e '
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 
 const HOME = process.env.HOME || process.env.USERPROFILE || "";
 const homunculus = HOME + "/.claude/homunculus";
@@ -79,29 +84,23 @@ for (const hash of entries) {
   let gitData = null;
   if (projectRoot && fs.existsSync(projectRoot)) {
     try {
-      const branch = execSync(
-        "git -C " + JSON.stringify(projectRoot) + " branch --show-current",
+      const branch = execFileSync("git", ["-C", projectRoot, "branch", "--show-current"],
         { stdio: ["pipe", "pipe", "pipe"], timeout: 3000 }
       ).toString().trim();
 
       let commits = "";
       try {
-        // Try with author filter first
-        const author = execSync(
-          "git -C " + JSON.stringify(projectRoot) + " config user.email",
+        const author = execFileSync("git", ["-C", projectRoot, "config", "user.email"],
           { stdio: ["pipe", "pipe", "pipe"], timeout: 2000 }
         ).toString().trim();
         if (author) {
-          commits = execSync(
-            "git -C " + JSON.stringify(projectRoot) + " log --oneline --since=\"00:00\" --author=" + JSON.stringify(author),
+          commits = execFileSync("git", ["-C", projectRoot, "log", "--oneline", "--since=00:00", "--author=" + author],
             { stdio: ["pipe", "pipe", "pipe"], timeout: 5000 }
           ).toString().trim();
         }
       } catch(e) {
-        // Fallback: no author filter
         try {
-          commits = execSync(
-            "git -C " + JSON.stringify(projectRoot) + " log --oneline --since=\"00:00\"",
+          commits = execFileSync("git", ["-C", projectRoot, "log", "--oneline", "--since=00:00"],
             { stdio: ["pipe", "pipe", "pipe"], timeout: 5000 }
           ).toString().trim();
         } catch(e2) {}
@@ -109,8 +108,7 @@ for (const hash of entries) {
 
       let status = "";
       try {
-        status = execSync(
-          "git -C " + JSON.stringify(projectRoot) + " status -s",
+        status = execFileSync("git", ["-C", projectRoot, "status", "-s"],
           { stdio: ["pipe", "pipe", "pipe"], timeout: 3000 }
         ).toString().trim();
       } catch(e) {}

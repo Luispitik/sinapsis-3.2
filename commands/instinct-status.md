@@ -12,22 +12,21 @@ Muestra el estado de todos los instincts del sistema NorteIA Continuous Learning
 
 ## Implementación
 
-1. Detectar proyecto actual (git remote hash o path)
-2. Leer instincts de `~/.claude/homunculus/projects/<hash>/instincts/personal/`
-3. Leer instincts globales de `~/.claude/homunculus/instincts/personal/`
-4. Mostrar tabla con: ID, trigger, confidence, domain, scope, marca
+1. Read `~/.claude/skills/_instincts-index.json`
+2. Group instincts by level: permanent, confirmed, draft
+3. Show table with: ID, domain, level, occurrences, trigger_pattern, last_triggered
+4. Show archived count separately
 
 ## Formato de salida
 
 ```
 ══════════════════════════════════════════════════
-  INSTINCT STATUS — NorteIA Continuous Learning
-  Proyecto: blackstone-pitch (a1b2c3d4e5f6)
+  INSTINCT STATUS — Sinapsis v4.3
 ══════════════════════════════════════════════════
 
-PROJECT-SCOPED (4 instincts):
-  ● html-interactivo-para-pitch    [pitch]     0.80  norteia
-  ● blackstone-3-lineas-servicio   [contratos] 0.75  norteia
+PERMANENT (2 instincts):
+  ● env-vars-never-hardcode    [security]  occ:42  last: 2026-04-07
+  ● locale-prefix-always       [nextjs]    occ:87  last: 2026-04-08
   ● roi-calculator-obligatorio     [pitch]     0.70  norteia
   ● diagnostico-8-areas            [lead]      0.65  norteia
 

@@ -112,10 +112,26 @@ echo -e "${GREEN}  OK${NC} Directories created"
 # ── Step 4: Copy core config files ──
 echo -e "${BLUE}[4/8]${NC} Installing core config files..."
 
+# Catalog always updates (system file, not user data)
 cp "$SCRIPT_DIR/core/_catalog.json" "$SKILLS_DIR/_catalog.json"
-cp "$SCRIPT_DIR/core/_passive-rules.json" "$SKILLS_DIR/_passive-rules.json"
-cp "$SCRIPT_DIR/core/_projects.json" "$SKILLS_DIR/_projects.json"
-cp "$SCRIPT_DIR/core/_instincts-index.json" "$SKILLS_DIR/_instincts-index.json"
+
+# User data files: preserve on upgrade, only create if missing
+# Bug #1-#3 fix: unconditional cp destroyed learned instincts, custom rules, and project registry
+FORCE_UPDATE=false
+for arg in "$@"; do
+    [ "$arg" = "--force-update" ] && FORCE_UPDATE=true
+done
+
+for datafile in _passive-rules.json _projects.json _instincts-index.json; do
+    if $FORCE_UPDATE || [ ! -f "$SKILLS_DIR/$datafile" ]; then
+        cp "$SCRIPT_DIR/core/$datafile" "$SKILLS_DIR/$datafile"
+        if $FORCE_UPDATE; then
+            echo -e "${YELLOW}  !  $datafile force-updated (--force-update)${NC}"
+        fi
+    else
+        echo -e "${CYAN}  ->  $datafile preserved (user data)${NC}"
+    fi
+done
 
 # Operator state: only create if not exists (preserve user data)
 if [ ! -f "$SKILLS_DIR/_operator-state.json" ]; then
@@ -133,6 +149,9 @@ else
     echo -e "${YELLOW}  ! CLAUDE.md already exists — not overwritten${NC}"
     echo -e "${YELLOW}    Check core/CLAUDE.md.template for updates${NC}"
 fi
+
+# v4.3.1: restrictive permissions on data files (#5D)
+chmod 600 "$SKILLS_DIR/_instincts-index.json" "$SKILLS_DIR/_passive-rules.json" "$SKILLS_DIR/_projects.json" "$SKILLS_DIR/_operator-state.json" 2>/dev/null || true
 
 echo -e "${GREEN}  OK${NC} Core config files installed"
 

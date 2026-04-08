@@ -7,15 +7,20 @@
 # NO LLM. Pure deterministic Node.js.
 
 HOMUNCULUS="$HOME/.claude/homunculus"
+
+if [ "${SINAPSIS_DEBUG:-}" = "1" ]; then
+  exec 2>>"$HOME/.claude/skills/_sinapsis-debug.log"
+fi
+
 INDEX_FILE="$HOME/.claude/skills/_instincts-index.json"
 PROPOSALS_FILE="$HOME/.claude/skills/_instinct-proposals.json"
 LOG_FILE="$HOME/.claude/skills/_session-learner.log"
 
-# Find the most recent observations file
+# Find the most recently MODIFIED observations file (fix #17: was selecting by hash, not recency)
 OBS_FILE=""
 if [ -d "$HOMUNCULUS/projects" ]; then
-  OBS_FILE=$(find "$HOMUNCULUS/projects" -name "observations.jsonl" -newer "$HOMUNCULUS/.last-learn" 2>/dev/null | head -1)
-  [ -z "$OBS_FILE" ] && OBS_FILE=$(find "$HOMUNCULUS/projects" -name "observations.jsonl" -size +0c 2>/dev/null | sort -t/ -k6 | tail -1)
+  OBS_FILE=$(find "$HOMUNCULUS/projects" -name "observations.jsonl" -newer "$HOMUNCULUS/.last-learn" -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
+  [ -z "$OBS_FILE" ] && OBS_FILE=$(find "$HOMUNCULUS/projects" -name "observations.jsonl" -size +0c -printf '%T@ %p\n' 2>/dev/null | sort -rn | head -1 | cut -d' ' -f2-)
 fi
 
 [ -z "$OBS_FILE" ] && exit 0

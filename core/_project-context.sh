@@ -12,12 +12,16 @@
 HOMUNCULUS="$HOME/.claude/homunculus"
 [ ! -d "$HOMUNCULUS" ] && exit 0
 
+if [ "${SINAPSIS_DEBUG:-}" = "1" ]; then
+  exec 2>>"$HOME/.claude/skills/_sinapsis-debug.log"
+fi
+
 node -e '
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
 const os = require("os");
-const { execSync } = require("child_process");
+const { execFileSync } = require("child_process");
 
 let input = "";
 process.stdin.setEncoding("utf8");
@@ -30,11 +34,36 @@ process.stdin.on("end", () => {
   const cwd = data.cwd || "";
 
   // Fire only once per session (flag in os.tmpdir)
-  const flagFile = path.join(os.tmpdir(), "sinapsis-ctx-" + sessionId);
+  // v4.3.1: cleanup old flag files on each run (#16)
+  const tmpDir = os.tmpdir();
+  const flagFile = path.join(tmpDir, "sinapsis-ctx-" + sessionId);
   if (fs.existsSync(flagFile)) process.exit(0);
   try { fs.writeFileSync(flagFile, "1"); } catch(e) {}
+  // Clean stale flag files (older than 24h)
+  try {
+    const cutoff = Date.now() - 86400000;
+    for (const f of fs.readdirSync(tmpDir)) {
+      if (!f.startsWith("sinapsis-ctx-")) continue;
+      const fp = path.join(tmpDir, f);
+      try { if (fs.statSync(fp).mtimeMs < cutoff) fs.unlinkSync(fp); } catch(e) {}
+    }
+  } catch(e) {}
 
   const HOME = process.env.HOME || process.env.USERPROFILE || "";
+
+  // v4.3.1: validate operator-state schema (#18) — warn if needsOnboarding is missing
+  try {
+    const osPath = HOME + "/.claude/skills/_operator-state.json";
+    if (fs.existsSync(osPath)) {
+      const os = JSON.parse(fs.readFileSync(osPath, "utf8"));
+      if (os.needsOnboarding === undefined && !os.operator) {
+        // Schema is broken — missing both needsOnboarding and operator
+        // Create a flag file so the skill-router knows to re-trigger onboarding
+        fs.writeFileSync(HOME + "/.claude/skills/_needs-schema-repair", "1");
+      }
+    }
+  } catch(e) {}
+
   const parts = [];
 
   // ── SOURCE 1: EOD daily summary (intent + priorities) ──
@@ -66,14 +95,12 @@ process.stdin.on("end", () => {
 
   let projectHash;
   try {
-    const root = execSync(
-      "git -C " + JSON.stringify(cwd) + " rev-parse --show-toplevel",
+    const root = execFileSync("git", ["-C", cwd, "rev-parse", "--show-toplevel"],
       { stdio: ["pipe", "pipe", "pipe"], timeout: 3000 }
     ).toString().trim();
     let remote = "";
     try {
-      remote = execSync(
-        "git -C " + JSON.stringify(root) + " remote get-url origin",
+      remote = execFileSync("git", ["-C", root, "remote", "get-url", "origin"],
         { stdio: ["pipe", "pipe", "pipe"], timeout: 2000 }
       ).toString().trim();
     } catch(e) {}

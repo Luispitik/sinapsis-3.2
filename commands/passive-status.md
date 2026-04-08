@@ -65,15 +65,23 @@ Each passive rule in `_passive-rules.json`:
 
 ```json
 {
-  "id": "rule_001",
-  "name": "conventional-commits",
-  "trigger": "When creating a git commit message",
-  "action": "Format as conventional commit: type(scope): description",
-  "domain": "workflow",
-  "enabled": true,
-  "fireCount": 47,
-  "lastFired": "2025-02-20T14:30:00Z",
-  "createdFrom": "inst_g003",
-  "createdDate": "2025-01-15"
+  "id": "env-never-commit",
+  "trigger": "git add|git commit",
+  "inject": "Verify .env* is in .gitignore. NEVER commit secrets or API keys.",
+  "severity": "critical",
+  "category": "security",
+  "tokens": 20
 }
 ```
+
+Fields:
+- `id`: Unique rule identifier
+- `trigger`: Regex pattern matched against tool_name + tool_input (or "EVERY_SESSION" for always-fire)
+- `inject`: Text injected into Claude's context when trigger matches
+- `severity`: critical | high | medium
+- `category`: security | workflow | quality | memory
+- `tokens`: Approximate token cost of the inject text
+
+Note: Fire count tracking is not yet implemented. The dashboard shows rule definitions and
+estimates activity based on trigger breadth. Future: add `fireCount` and `lastFired` fields
+via `_passive-activator.sh` atomic writes (same pattern as instinct occurrence tracking).

@@ -10,6 +10,11 @@ LOG_FILE="$HOME/.claude/skills/_instinct.log"
 
 [ ! -f "$INDEX_FILE" ] && exit 0
 
+# v4.3.1: SINAPSIS_DEBUG mode (#22) — redirect stderr to log instead of /dev/null
+if [ "${SINAPSIS_DEBUG:-}" = "1" ]; then
+  exec 2>>"$HOME/.claude/skills/_sinapsis-debug.log"
+fi
+
 node -e '
 const fs = require("fs");
 
@@ -38,12 +43,12 @@ process.stdin.on("end", () => {
   try {
     const cwd = data.cwd || "";
     if (cwd) {
-      const { execSync } = require("child_process");
-      const root = execSync("git -C " + JSON.stringify(cwd) + " rev-parse --show-toplevel",
+      const { execFileSync } = require("child_process");
+      const root = execFileSync("git", ["-C", cwd, "rev-parse", "--show-toplevel"],
         { stdio: ["pipe","pipe","pipe"], timeout: 2000 }).toString().trim();
       const crypto = require("crypto");
       let remote = "";
-      try { remote = execSync("git -C " + JSON.stringify(root) + " remote get-url origin",
+      try { remote = execFileSync("git", ["-C", root, "remote", "get-url", "origin"],
         { stdio: ["pipe","pipe","pipe"], timeout: 1000 }).toString().trim(); } catch(e) {}
       const hash = crypto.createHash("sha256").update(remote || root).digest("hex").slice(0, 12);
       const ctxPath = process.env.HOME + "/.claude/homunculus/projects/" + hash + "/context.md";
@@ -71,21 +76,30 @@ process.stdin.on("end", () => {
 
   for (const inst of instincts) {
     if (!inst.trigger_pattern) continue;
-    if (inst.level === "draft") continue; // drafts never auto-inject — only via /analyze-session
+    // v4.3.1: drafts participate in matching for occurrence tracking + auto-promote
+    // but are NOT injected into context (only confirmed/permanent inject)
+    const isDraft = inst.level === "draft";
     // v4.2.1: skip instincts from irrelevant domains (if project context available)
     if (skipDomains && inst.domain && !skipDomains.has(inst.domain)) continue;
     try {
-      if (!new RegExp(inst.trigger_pattern, "i").test(context)) continue;
+      // v4.3.1: ReDoS protection — reject patterns with nested quantifiers
+      const tp = inst.trigger_pattern;
+      if (/(\+|\*|\{)\)?(\+|\*|\{)/.test(tp)) continue; // skip catastrophic backtracking patterns
+      if (!new RegExp(tp, "i").test(context)) continue;
     } catch(e) { continue; }
     matches.push(inst);
   }
 
   if (!matches.length) process.exit(0);
 
+  // Separate drafts from injectable instincts
+  const draftMatches = matches.filter(m => m.level === "draft");
+  const injectableMatches = matches.filter(m => m.level !== "draft");
+
   // Priority sort: permanent first, then confirmed; within same level, highest occurrences wins
   // v4.2.1: occurrences tiebreaker (inspired by fs-cortex confidence granularity)
   const order = { permanent: 0, confirmed: 1 };
-  matches.sort((a, b) => {
+  injectableMatches.sort((a, b) => {
     const lvl = (order[a.level] ?? 2) - (order[b.level] ?? 2);
     if (lvl !== 0) return lvl;
     return (b.occurrences || 0) - (a.occurrences || 0); // higher occurrences = higher priority
@@ -93,23 +107,34 @@ process.stdin.on("end", () => {
 
   // Deduplicate by domain — keep only highest priority match per domain
   const domainMap = {};
-  for (const m of matches) {
+  for (const m of injectableMatches) {
     const d = m.domain || "_default";
     if (!domainMap[d]) domainMap[d] = m; // already sorted, first = highest priority
   }
   const top = Object.values(domainMap).slice(0, 3);
-  const msgs = top.map(m => "[instinct] " + m.inject);
 
-  console.log(JSON.stringify({ systemMessage: msgs.join("\n\n") }));
+  // v4.3.1: sanitize inject content (#5F — prompt injection prevention)
+  const INJECT_MAX_LEN = 500;
+  const INJECT_BLOCKED = /ignore\s+(previous|above|all)\s+instructions|system:\s*you\s+are|<\/?system>|<\/?prompt>/i;
 
-  // v4.2: Occurrence tracking + auto-promote in the index (atomic write)
+  // Only output systemMessage if there are injectable matches
+  if (top.length > 0) {
+    const msgs = top
+      .filter(m => !INJECT_BLOCKED.test(m.inject || ""))
+      .map(m => "[instinct] " + (m.inject || "").slice(0, INJECT_MAX_LEN));
+    if (msgs.length > 0) {
+      console.log(JSON.stringify({ systemMessage: msgs.join("\n\n") }));
+    }
+  }
+
+  // v4.3.1: Occurrence tracking for ALL matches (including drafts) + auto-promote
   const now = new Date().toISOString();
   let promoted = [];
   try {
-    const matchedIds = new Set(top.map(m => m.id));
+    const allMatchedIds = new Set([...top.map(m => m.id), ...draftMatches.map(m => m.id)]);
     let dirty = false;
     for (const inst of index.instincts) {
-      if (!matchedIds.has(inst.id)) continue;
+      if (!allMatchedIds.has(inst.id)) continue;
       inst.occurrences = (inst.occurrences || 0) + 1;
       inst.last_triggered = now;
       if (!inst.first_triggered) inst.first_triggered = now;
@@ -122,9 +147,15 @@ process.stdin.on("end", () => {
     }
     if (dirty) {
       const indexPath = process.env.HOME + "/.claude/skills/_instincts-index.json";
-      const tmpPath = indexPath + ".tmp";
-      fs.writeFileSync(tmpPath, JSON.stringify(index, null, 2));
-      fs.renameSync(tmpPath, indexPath);
+      // v4.3.1: skip write if dream cycle holds the lock (#6 race condition)
+      const dreamLock = process.env.HOME + "/.claude/skills/_dream.lock";
+      if (fs.existsSync(dreamLock)) {
+        // Dream cycle is running — skip write to avoid data loss
+      } else {
+        const tmpPath = indexPath + ".tmp";
+        fs.writeFileSync(tmpPath, JSON.stringify(index, null, 2));
+        fs.renameSync(tmpPath, indexPath);
+      }
     }
   } catch(e) {}
 
