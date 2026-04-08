@@ -258,4 +258,11 @@ if (found.length > 0) {
 }
 ' "$OBS_FILE" "$INDEX_FILE" "$PROPOSALS_FILE" "$LOG_FILE" 2>/dev/null
 
+# v5: Spawn reflection orchestrator in background (non-blocking)
+# Runs Scout (Haiku) and optionally Analyst (Sonnet) on new proposals
+ORCH_SCRIPT="$HOME/.claude/skills/_reflection-orchestrator.sh"
+if [ -f "$ORCH_SCRIPT" ] && [ -f "$PROPOSALS_FILE" ]; then
+  nohup bash "$ORCH_SCRIPT" >> "$HOME/.claude/skills/_reflection.log" 2>&1 &
+fi
+
 exit 0
