@@ -1,5 +1,26 @@
 # Changelog
 
+## v4.4 (2026-04-09)
+
+### Added — GStack Integration (garrytan/gstack)
+- **Confidence decay** in `_instinct-activator.sh`: confirmed(60d inactive) -> draft, draft(90d inactive) -> archived. Permanent never decays. Credit: garrytan/gstack learnings confidence decay.
+- **`/review-army`** skill: 5 specialist parallel code review (security, nextjs, supabase, performance, testing). Fix-First workflow, quality scoring. Tested live on mission-control (8.5/10, 3 findings, 0 false positives).
+- **`/cso-audit`** skill: OWASP Top 10 + STRIDE + supply chain + LLM security audit. Daily mode (8/10 gate) and comprehensive mode (2/10 gate).
+- **`/investigate-pro`** skill: 4-phase systematic debugging (investigate -> analyze -> hypothesize -> implement). Iron Law: no fix without confirmed root cause. Scope freeze via hooks.
+- **Session timeline** (`_session-timeline.jsonl`): JSONL event log for skill usage tracking, context recovery, and retrospectives. Helper: `_timeline-log.sh`.
+- **`/retro-semanal`** command: Weekly metrics across all projects — commits, skills used, instincts activated, health score trend, recommendations.
+- **Cross-project instinct search** in `/instinct-status --cross-project`: search instincts across all registered projects in `_projects.json` without promoting.
+
+### Changed
+- `_catalog.json`: +3 skills (review-army, cso-audit, investigate-pro)
+- `/instinct-status`: rewritten for v4.4 data model (draft/confirmed/permanent levels, occurrence tracking, cross-project search)
+
+### Inspiration
+- garrytan/gstack (23 YC engineering skills): confidence decay, review army, CSO audit, investigate, retro, session timeline, cross-project search
+- Full analysis: `gstack-integration-analysis.md`
+
+---
+
 ## v4.3.1 (2026-04-08)
 
 ### Fixed — Fersora Audit (22 bugs + 6 vulnerabilities)
