@@ -10,3 +10,4 @@ _reflection-log.jsonl
 *.tmp
 *.swp
 _backup_*
+__pycache__/
