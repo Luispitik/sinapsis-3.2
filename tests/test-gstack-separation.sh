@@ -65,7 +65,7 @@ echo ""
 echo "[Section 3] No dangling references to removed components"
 
 # Check that no .sh or .md file references _timeline-log.sh
-TIMELINE_REFS=$(grep -rl "_timeline-log" "$SCRIPT_DIR" --include="*.sh" --include="*.md" --include="*.json" 2>/dev/null | grep -v "test-gstack-separation" | grep -v ".git/" | grep -v "CHANGELOG.md" | wc -l)
+TIMELINE_REFS=$(grep -rl "_timeline-log" "$SCRIPT_DIR" --include="*.sh" --include="*.md" --include="*.json" 2>/dev/null | grep -v "test-gstack-separation" | grep -v ".git/" | grep -v "CHANGELOG.md" | grep -v "install.sh" | wc -l)
 if [ "$TIMELINE_REFS" -eq 0 ]; then
   pass "No references to _timeline-log.sh in codebase"
 else

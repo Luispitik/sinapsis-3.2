@@ -1,0 +1,43 @@
+name: Sinapsis Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Run dream cycle tests
+        shell: bash
+        run: bash tests/test-dream.sh
+
+      - name: Run security tests
+        shell: bash
+        run: bash tests/test-security.sh
+
+      - name: Run E2E dream tests
+        shell: bash
+        run: bash tests/test-e2e-dream.sh
+
+      - name: Run gstack separation tests
+        shell: bash
+        run: bash tests/test-gstack-separation.sh
+
+      - name: Run v4.3.3 hardening tests
+        shell: bash
+        run: bash tests/test-v433-hardening.sh

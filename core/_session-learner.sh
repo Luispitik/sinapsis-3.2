@@ -1,9 +1,12 @@
 #!/bin/bash
-# Session Learner - Sinapsis v4.2
-# Stop hook: three jobs —
-#   1. Detect patterns (error-fix, user-corrections, workflow-chains) → _instinct-proposals.json
-#   2. Write context.md per project → picked up by _project-context.sh next session
-#   3. Enrich proposals with project context and sample data
+# Session Learner - Sinapsis v4.3.3
+# Stop hook: five detectors —
+#   1. error-fix pairs (error → same tool success within 5 events)
+#   2. user-corrections (same file edited 2+ times within 10 events)
+#   3. workflow-chains (tool trigram repeated 2+ times)
+#   4. repetitions (same error pattern across 3+ sessions — cross-session memory)
+#   5. agent-patterns (subagent tool sequences captured from Agent tool calls)
+# Also writes context.md per project.
 # NO LLM. Pure deterministic Node.js.
 
 HOMUNCULUS="$HOME/.claude/homunculus"
@@ -223,6 +226,71 @@ if (toolSeq.length >= 6) {
       sample_output: ""
     });
     proposedIds.add(wfId);
+  }
+}
+
+// PATTERN 4: repetitions — same error tool seen in proposals from 3+ different days
+// v4.3.3: cross-session memory. Reads prior proposals to find recurring error patterns.
+// Cortex tracks this via "repetitions (>3 sessions)" — we use proposal history.
+try {
+  const rawProposals = JSON.parse(fs.readFileSync(proposalsFile, "utf8"));
+  const priorPropDates = {};
+  for (const p of (rawProposals.proposals || [])) {
+    if (p.type === "error_resolution" && p.proposed_at) {
+      const day = p.proposed_at.slice(0, 10);
+      if (!priorPropDates[p.id]) priorPropDates[p.id] = new Set();
+      priorPropDates[p.id].add(day);
+    }
+  }
+  // Also count today errors
+  for (const f of found) {
+    if (f.type === "error_resolution") {
+      if (!priorPropDates[f.id]) priorPropDates[f.id] = new Set();
+      priorPropDates[f.id].add(today);
+    }
+  }
+  for (const [errId, days] of Object.entries(priorPropDates)) {
+    if (days.size < 3) continue; // need 3+ distinct days
+    const repId = "repetition-" + errId;
+    if (existing.has(repId) || proposedIds.has(repId)) continue;
+    found.push({
+      type: "repetition",
+      id: repId,
+      description: errId + " repetido en " + days.size + " sesiones distintas — patron recurrente confirmado",
+      evidence: "Detectado en fechas: " + [...days].sort().join(", "),
+      project_name: projectName,
+      sample_input: "",
+      sample_output: ""
+    });
+    proposedIds.add(repId);
+  }
+} catch(e) { /* no prior proposals = skip */ }
+
+// PATTERN 5: agent patterns — captures tool sequences within Agent tool calls
+// v4.3.3: subagent behaviors are valuable learning data (Cortex agent-patterns)
+const agentEvents = lines.filter(l =>
+  l.tool === "Agent" && l.event === "tool_complete" && l.output
+);
+for (const ae of agentEvents) {
+  // Extract subagent type and result patterns from output
+  const output = (ae.output || "").slice(0, 1000);
+  const agentTypeMatch = output.match(/subagent_type[=:]?\s*["']?(\w+)/i);
+  const agentType = agentTypeMatch ? agentTypeMatch[1] : "general";
+  // If agent output contains error keywords, propose a pattern
+  const hasError = /\berror\b|\bfailed\b|\bexception\b/i.test(output);
+  if (hasError) {
+    const agId = "agent-error-" + agentType.toLowerCase();
+    if (existing.has(agId) || proposedIds.has(agId)) continue;
+    found.push({
+      type: "agent_pattern",
+      id: agId,
+      description: "Subagente " + agentType + " reporto errores — posible gotcha a documentar",
+      evidence: "Sesion " + today + ": Agent tool con errores en output",
+      project_name: projectName,
+      sample_input: (ae.input || "").slice(0, 200),
+      sample_output: output.slice(0, 200)
+    });
+    proposedIds.add(agId);
   }
 }
 

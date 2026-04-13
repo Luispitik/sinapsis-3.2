@@ -1,0 +1,28 @@
+#!/bin/bash
+# Sinapsis pre-push hook — blocks push if tests fail
+# Install: git config core.hooksPath .githooks
+
+echo "Running Sinapsis test suite before push..."
+echo ""
+
+FAIL=0
+
+for suite in tests/test-*.sh; do
+  [ ! -f "$suite" ] && continue
+  name=$(basename "$suite" .sh)
+  if bash "$suite" > /dev/null 2>&1; then
+    echo "  PASS: $name"
+  else
+    echo "  FAIL: $name"
+    FAIL=1
+  fi
+done
+
+echo ""
+if [ "$FAIL" -eq 1 ]; then
+  echo "PUSH BLOCKED — fix failing tests first."
+  exit 1
+fi
+
+echo "All tests passed. Pushing..."
+exit 0

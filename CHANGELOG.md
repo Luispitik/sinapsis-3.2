@@ -8,10 +8,16 @@
 - **Path traversal protection** in `_instinct-activator.sh`: blocks inject content containing `../`, `~/`, `/etc/`, `/proc/`.
 - **Token budget cap** (`TOKEN_BUDGET=1500`): limits total chars injected per tool use. Prevents instinct loops.
 - **Multi-session auto-promote**: drafts now require 5+ occurrences AND 3+ distinct sessions to promote. Tracks `sessions_seen[]` per instinct. (Was: 5+ occurrences in any number of sessions.)
+- **2 new pattern detectors** in `_session-learner.sh`: repetitions (same error in 3+ sessions) and agent patterns (subagent error capture). Now 5 detectors total (was 3).
+- **GitHub Actions CI**: test suite runs on push/PR across Ubuntu, macOS, Windows.
+- **Pre-push hook**: `.githooks/pre-push` blocks push if any test suite fails. Enable: `git config core.hooksPath .githooks`
+- **Legacy file cleanup** in `install.sh`: removes obsolete files from v3.2/v4.4 on upgrade (gstack skills, old skill names, clone.md).
 
 ### Changed
 - `observe_v3.py`: 5 → 8 scrubbing patterns
 - `_instinct-activator.sh`: path traversal check, budget cap, multi-session tracking
+- `_session-learner.sh`: 3 → 5 pattern detectors (+ repetitions + agent patterns)
+- `install.sh`: legacy cleanup step added
 
 ### Tests
 - 14 new TDD tests (`tests/test-v433-hardening.sh`)

@@ -174,6 +174,28 @@ chmod +x "$SKILLS_DIR/_dream.sh"
 
 echo -e "${GREEN}  OK${NC} 5 hook scripts + dream cycle installed and made executable"
 
+# ── Step 5b: Legacy file cleanup (v4.3.3) ──
+LEGACY_CLEANED=0
+# v4.4 gstack files (removed in v4.3.2)
+for legacy in "$SKILLS_DIR/_timeline-log.sh" "$SKILLS_DIR/_session-timeline.jsonl" \
+  "$SKILLS_DIR/review-army" "$SKILLS_DIR/cso-audit" "$SKILLS_DIR/investigate-pro"; do
+  if [ -e "$legacy" ]; then
+    rm -rf "$legacy"
+    LEGACY_CLEANED=$((LEGACY_CLEANED + 1))
+  fi
+done
+# v3.2 leftovers
+for legacy in "$SKILLS_DIR/sinapsis-optimizer" "$SKILLS_DIR/sinapsis-researcher" \
+  "$SKILLS_DIR/synapis-learning" "$COMMANDS_DIR/clone.md" "$COMMANDS_DIR/retro-semanal.md"; do
+  if [ -e "$legacy" ]; then
+    rm -rf "$legacy"
+    LEGACY_CLEANED=$((LEGACY_CLEANED + 1))
+  fi
+done
+if [ "$LEGACY_CLEANED" -gt 0 ]; then
+  echo -e "${YELLOW}  !  Cleaned $LEGACY_CLEANED legacy files from previous versions${NC}"
+fi
+
 # ── Step 6: Configure settings.json ──
 echo -e "${BLUE}[6/8]${NC} Configuring hooks in settings.json..."
 
