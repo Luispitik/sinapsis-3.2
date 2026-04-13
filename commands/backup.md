@@ -84,10 +84,30 @@ To restore on another machine:
 - `_dream.lock`, `_dream.log`, `_dream-report.md` — transient dream cycle artifacts
 - `_session-learner.log` — transient log
 
-## For continuous sync (e.g., OneDrive/Dropbox)
+## For continuous sync (any cloud provider)
 
-Run `/backup ~/OneDrive/sinapsis-sync` periodically or after `/evolve` sessions.
-The backup folder is self-contained — just point `/restore` at it on the other machine.
+The backup is a plain folder — any cloud sync service works. Run `/backup` with your sync path:
+
+**Windows:**
+- OneDrive: `/backup ~/OneDrive/sinapsis-sync`
+- Google Drive: `/backup ~/Google\ Drive/sinapsis-sync` or `/backup "C:/Users/{user}/Google Drive/My Drive/sinapsis-sync"`
+- Dropbox: `/backup ~/Dropbox/sinapsis-sync`
+
+**macOS:**
+- iCloud: `/backup ~/Library/Mobile\ Documents/com~apple~CloudDocs/sinapsis-sync`
+- Google Drive: `/backup ~/Library/CloudStorage/GoogleDrive-{email}/My\ Drive/sinapsis-sync`
+- OneDrive: `/backup ~/Library/CloudStorage/OneDrive-Personal/sinapsis-sync`
+- Dropbox: `/backup ~/Dropbox/sinapsis-sync`
+
+**Linux:**
+- Google Drive (rclone): `/backup ~/gdrive/sinapsis-sync`
+- Dropbox: `/backup ~/Dropbox/sinapsis-sync`
+- Any mounted share: `/backup /mnt/sync/sinapsis-sync`
+
+**USB / manual:** `/backup /path/to/usb/sinapsis-sync`
+
+No network connection needed between machines — the cloud service handles sync.
+Run periodically or after `/evolve` sessions.
 
 ## Important Rules
 

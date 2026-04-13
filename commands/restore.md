@@ -11,7 +11,14 @@ command: true
 
 ## Trigger
 
-`/restore`, `/restore ~/OneDrive/sinapsis-sync`, "restore sinapsis", "import sinapsis backup", "sync from backup"
+`/restore`, `/restore <path>`, "restore sinapsis", "import sinapsis backup", "sync from backup"
+
+Common paths by platform:
+- Windows OneDrive: `/restore ~/OneDrive/sinapsis-sync`
+- Windows Google Drive: `/restore "C:/Users/{user}/Google Drive/My Drive/sinapsis-sync"`
+- macOS iCloud: `/restore ~/Library/Mobile\ Documents/com~apple~CloudDocs/sinapsis-sync`
+- macOS Google Drive: `/restore ~/Library/CloudStorage/GoogleDrive-{email}/My\ Drive/sinapsis-sync`
+- Dropbox (any OS): `/restore ~/Dropbox/sinapsis-sync`
 
 ## Process
 
