@@ -54,20 +54,48 @@ const projectHash = path.basename(projectDir);
 const today = new Date().toISOString().slice(0, 10);
 
 // Get project name + root + remote (hoisted — used by JOB 1, JOB 1.5 upsert and JOB 2)
-// Primary source: observations themselves (observe.sh writes project_name into each entry)
+// Primary source: observations (observe.sh writes project_name and cwd into each entry)
 let projectName = projectHash;
 let projectRoot = "";
 let projectRemote = "";
+const { execFileSync } = require("child_process");
+// On Windows under Git Bash, cwd may arrive as "/c/Users/..." which native
+// git.exe rejects. Convert to "C:/Users/..." form which works on both POSIX and Windows.
+function normalizeCwd(p) {
+  if (!p) return p;
+  const m = p.match(/^\/([a-zA-Z])\/(.*)$/);
+  return m ? m[1].toUpperCase() + ":/" + m[2] : p;
+}
 try {
-  if (lines[0] && lines[0].project_name) projectName = lines[0].project_name;
+  // Prefer most recent observation (cwd may have moved over time)
+  for (let i = lines.length - 1; i >= 0; i--) {
+    if (!projectName || projectName === projectHash) {
+      if (lines[i].project_name) projectName = lines[i].project_name;
+    }
+    if (!projectRoot && lines[i].cwd) {
+      const cwd = normalizeCwd(lines[i].cwd);
+      try {
+        const root = execFileSync("git", ["-C", cwd, "rev-parse", "--show-toplevel"],
+          { stdio: ["ignore", "pipe", "ignore"], encoding: "utf8", timeout: 2000 }).trim();
+        if (root) {
+          projectRoot = root;
+          try {
+            projectRemote = execFileSync("git", ["-C", root, "remote", "get-url", "origin"],
+              { stdio: ["ignore", "pipe", "ignore"], encoding: "utf8", timeout: 2000 }).trim();
+          } catch(e) {}
+        }
+      } catch(e) {}
+    }
+    if (projectName !== projectHash && projectRoot) break;
+  }
 } catch(e) {}
 // Legacy fallback: homunculus/projects.json (kept for back-compat with installs that created it)
 try {
   const pj = JSON.parse(fs.readFileSync(process.env.HOME + "/.claude/homunculus/projects.json", "utf8"));
   if (pj[projectHash]) {
     if (pj[projectHash].name && projectName === projectHash) projectName = pj[projectHash].name;
-    if (pj[projectHash].root) projectRoot = pj[projectHash].root;
-    if (pj[projectHash].remote) projectRemote = pj[projectHash].remote;
+    if (pj[projectHash].root && !projectRoot) projectRoot = pj[projectHash].root;
+    if (pj[projectHash].remote && !projectRemote) projectRemote = pj[projectHash].remote;
   }
 } catch(e) {}
 
@@ -123,33 +151,73 @@ try {
 // ── JOB 1.5: Upsert canonical project registry _projects.json ──
 // FIX: prior to this, _projects.json was never populated by any hook even though
 // /projects, /eod, /instinct-status, /evolve, /backup all read from it.
-// We upsert here on every Stop event — atomic write, schema-stable, idempotent.
+// We upsert here on every Stop event — atomic write + advisory lock, idempotent.
 try {
   const registryPath = process.env.HOME + "/.claude/skills/_projects.json";
-  let registry;
-  try {
-    registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
-  } catch(e) {
-    registry = { version: "4.1", system: "sinapsis", projects: [], note: "Projects registered automatically by _session-learner.sh on Stop events." };
-  }
-  if (!Array.isArray(registry.projects)) registry.projects = [];
-
+  const lockPath = registryPath + ".lock";
   const now = new Date().toISOString();
-  let entry = registry.projects.find(p => p && p.id === projectHash);
-  if (!entry) {
-    entry = { id: projectHash, name: projectName, root: projectRoot, remote: projectRemote, created: now, last_seen: now };
-    registry.projects.push(entry);
-  } else {
-    if (projectName && projectName !== projectHash) entry.name = projectName;
-    if (projectRoot) entry.root = projectRoot;
-    if (projectRemote) entry.remote = projectRemote;
-    entry.last_seen = now;
-  }
 
-  // Atomic write: tmp + rename (avoids torn writes if multiple sessions Stop concurrently)
-  const tmpPath = registryPath + ".tmp." + process.pid;
-  fs.writeFileSync(tmpPath, JSON.stringify(registry, null, 2));
-  fs.renameSync(tmpPath, registryPath);
+  // Advisory lock to prevent lost updates when multiple Stop hooks fire concurrently
+  // from different sessions. tmp+rename alone prevents torn writes but NOT lost updates.
+  // Strategy: O_EXCL create on .lock, retry with backoff, skip if still locked.
+  const STALE_LOCK_MS = 10000;
+  let lockFd = null;
+  for (let attempt = 0; attempt < 8 && lockFd === null; attempt++) {
+    try {
+      lockFd = fs.openSync(lockPath, "wx");
+    } catch(e) {
+      if (e.code !== "EEXIST") throw e;
+      // Lock exists — check if stale (orphaned by crashed process)
+      try {
+        const stat = fs.statSync(lockPath);
+        if (Date.now() - stat.mtimeMs > STALE_LOCK_MS) {
+          fs.unlinkSync(lockPath);
+          continue;
+        }
+      } catch(_) {}
+      // Backoff: 50ms, 100ms, 150ms, ...
+      const sleepMs = 50 * (attempt + 1);
+      const waitUntil = Date.now() + sleepMs;
+      while (Date.now() < waitUntil) { /* spin (no sleep primitive in stdlib) */ }
+    }
+  }
+  if (lockFd === null) {
+    // Could not acquire lock — skip this upsert. Next Stop will retry.
+    if (process.env.SINAPSIS_DEBUG === "1") {
+      process.stderr.write("[session-learner] _projects.json: lock contention, skipping upsert\n");
+    }
+  } else {
+    try {
+      // Read registry AFTER acquiring lock (prevents lost updates: another writer
+      // may have added entries between our earlier code and now).
+      let registry;
+      try {
+        registry = JSON.parse(fs.readFileSync(registryPath, "utf8"));
+      } catch(e) {
+        registry = { version: "4.1", system: "sinapsis", projects: [], note: "Projects registered automatically by _session-learner.sh on Stop events." };
+      }
+      if (!Array.isArray(registry.projects)) registry.projects = [];
+
+      let entry = registry.projects.find(p => p && p.id === projectHash);
+      if (!entry) {
+        entry = { id: projectHash, name: projectName, root: projectRoot, remote: projectRemote, created: now, last_seen: now };
+        registry.projects.push(entry);
+      } else {
+        if (projectName && projectName !== projectHash) entry.name = projectName;
+        if (projectRoot) entry.root = projectRoot;
+        if (projectRemote) entry.remote = projectRemote;
+        entry.last_seen = now;
+      }
+
+      // Atomic write: tmp + rename (still needed for crash safety)
+      const tmpPath = registryPath + ".tmp." + process.pid;
+      fs.writeFileSync(tmpPath, JSON.stringify(registry, null, 2));
+      fs.renameSync(tmpPath, registryPath);
+    } finally {
+      try { fs.closeSync(lockFd); } catch(_) {}
+      try { fs.unlinkSync(lockPath); } catch(_) {}
+    }
+  }
 } catch(e) {
   // Registry upsert failure is non-critical (logged for debugging)
   if (process.env.SINAPSIS_DEBUG === "1") {
