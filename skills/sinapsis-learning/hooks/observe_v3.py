@@ -125,6 +125,7 @@ def main():
         "session": session_id,
         "project_id": project_id,
         "project_name": project_name,
+        "cwd": cwd,
     }
 
     if event == "tool_start":
