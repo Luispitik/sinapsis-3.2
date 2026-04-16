@@ -1,7 +1,7 @@
-# Sinapsis v4.3.3
+# Sinapsis v4.4.0
 
-[![Version](https://img.shields.io/badge/version-4.3.3-blue.svg)](https://github.com/Luispitik/sinapsis)
-[![Tests](https://img.shields.io/badge/tests-83%20passing-green.svg)](tests/)
+[![Version](https://img.shields.io/badge/version-4.4.0-blue.svg)](https://github.com/Luispitik/sinapsis)
+[![Tests](https://img.shields.io/badge/tests-95%20passing-green.svg)](tests/)
 [![CI](https://github.com/Luispitik/sinapsis/actions/workflows/tests.yml/badge.svg)](https://github.com/Luispitik/sinapsis/actions)
 [![License](https://img.shields.io/badge/license-Source%20Available-orange.svg)](LICENSE)
 
@@ -27,6 +27,17 @@ Every time you start a new session, Claude starts from zero. Your preferences, y
 Think of it as going from a dumb terminal to an assistant that actually knows you.
 
 ---
+
+## What's New in v4.4.0 — Observability Dashboard
+
+> See the system that sees you.
+
+- **`/dashboard-sinapsis`** command: generates a self-contained HTML dashboard (`~/.claude/skills/_dashboard.html`) with real data parsed from your instincts, passive rules, proposals, skills catalog, projects and activation logs.
+- **Editorial design**: serif display typography (Instrument Serif) on deep ink background with warm accents (lime / coral / sky / amber). Not the usual dashboard chrome.
+- **8 metric sections**: hero KPIs · velocity (creation rate per week) · timings (hour-of-day distribution + maturation phases) · 21-day activity heatmap · funnel observations→permanent · 10-point leaderboards (instincts / passive rules) · skills donut + dead-instincts table · projects ranking · decision timeline.
+- **Zero LLM, zero tokens**: pure Python deterministic parser of 8 data sources. Milliseconds to regenerate.
+- **Portable**: honors `$SINAPSIS_HOME` env var or falls back to `~/.claude/`. Works on macOS / Linux / Windows (Git Bash).
+- **12 new TDD tests** (`tests/test-dashboard.sh`) — 95 total passing.
 
 ## What's New in v4.3.3 — Hardening + Portability
 

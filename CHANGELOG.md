@@ -1,5 +1,22 @@
 # Changelog
 
+## v4.4.0 (2026-04-16)
+
+### Added — Observability Dashboard
+- **`/dashboard-sinapsis`** command: regenerates `~/.claude/skills/_dashboard.html` — a self-contained visual dashboard with real data parsed from all pipeline files. Editorial design (Instrument Serif + warm accents on deep ink).
+- **`core/_generate-dashboard.py`**: deterministic Python generator. Parses `_instincts-index.json`, `_passive-rules.json`, `_passive.log`, `_instinct-proposals.json`, `_instinct.log`, `_catalog.json`, `_projects.json`, `_operator-state.json` and `homunculus/projects/*/observations.jsonl`. Computes hero KPIs, velocity (new instincts per week), hour-of-day distribution, 21-day activity heatmap, maturation averages (add→first_triggered), funnel metrics, top-10 leaderboards and dead-instincts list. Portable: honors `$SINAPSIS_HOME` env var or falls back to `~/.claude/`.
+- **`core/_dashboard-template.html`**: HTML template with `/*__SINAPSIS_DATA__*/null` injection marker. Chart.js + Google Fonts via CDN. Dark editorial theme with serif display + Inter + JetBrains Mono. Responsive.
+- **12 TDD tests** (`tests/test-dashboard.sh`): portability, template substitution, metric computation, dead detection, level counting, domain aggregation, empty-state graceful handling.
+
+### Changed
+- `install.sh`: +2 files installed (`_generate-dashboard.py`, `_dashboard-template.html`)
+- Test badge: 83 → 95 passing
+
+### Rationale
+Sinapsis already had `/instinct-status`, `/passive-status` and `/system-status` for terminal inspection. None gave a holistic, at-a-glance view of the learning system's health, velocity or maturation timings. The dashboard surfaces what the existing commands couldn't: **how fast you're learning, when the system fires, and where the dead weight is**.
+
+---
+
 ## v4.3.3 (2026-04-13)
 
 ### Added — Hardening from Cortex Comparison (credit: Fernando Montero / fs-cortex v3.10)
