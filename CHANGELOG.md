@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## v4.4.1 (2026-04-17)
 
 ### Fixed
 - **`_session-learner.sh` line 277 — bash quoting bug (regression)**: the regex `["']?` inside `node -e '...'` closed the bash single-quoted string prematurely, causing every Stop event to crash with `syntax error near unexpected token (`. Pattern 4 (repetitions) and Pattern 5 (agent-patterns) never ran. Replaced literal `'` in the regex char class with the JS unicode escape `\u0027`. Added regression test (`bash -n` of all `core/*.sh`).
