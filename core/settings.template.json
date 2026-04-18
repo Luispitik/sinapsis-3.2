@@ -1,8 +1,21 @@
 {
-  "_comment": "Sinapsis v4.1 — settings.json template. Copy to ~/.claude/settings.json (merge with existing).",
-  "_hooks_total": 6,
-  "_hooks_breakdown": "PreToolUse(4) + PostToolUse(1) + Stop(1)",
+  "_comment": "Sinapsis v4.5 — settings.json template. Copy to ~/.claude/settings.json (merge with existing).",
+  "_hooks_total": 7,
+  "_hooks_breakdown": "SessionStart(1) + PreToolUse(4) + PostToolUse(1) + Stop(1)",
   "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "_comment": "laws-injector: emits SESSION_PREFETCH_LAWS lines (max 10, cap ~300 tokens, rotation)",
+            "type": "command",
+            "command": "bash ~/.claude/skills/_laws-injector.sh",
+            "timeout": 3
+          }
+        ]
+      }
+    ],
     "PreToolUse": [
       {
         "matcher": "*",

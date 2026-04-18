@@ -1,8 +1,8 @@
-# Sinapsis v4.3.3 — Feature Reference
+# Sinapsis v4.5 — Feature Reference
 
 > Complete inventory of all features, commands, hooks, modules, and capabilities.
 > **Update this file with every feat/fix commit.**
-> Last updated: 2026-04-13
+> Last updated: 2026-04-18
 
 ---
 
@@ -31,19 +31,24 @@ Parallel systems (not part of the confidence pipeline):
 
 | Injection Point | What | When | Tokens |
 |---|---|---|---|
-| **SessionStart** | Project context.md + EOD resume | Once per session (via _project-context.sh) | ~150 |
+| **SessionStart** | Project context.md + EOD resume + **Laws (v4.5)** | Once per session | ~150 + ~300 laws |
 | **PreToolUse** | Instincts (max 3) + Passive Rules (max 3) | Every tool use (if trigger matches) | ~200 max |
 
-### 6-Hook Pipeline
+### 7-Hook Pipeline
 
 | Hook | File | Lines | Event | Mode | Timeout |
 |---|---|---|---|---|---|
+| **Laws Injector (v4.5)** | `_laws-injector.sh` | 70 | SessionStart | Sync | 3s |
 | Observer | `observe_v3.py` | 200 | Pre/PostToolUse | Async (0 tokens) | 10s |
 | Project Context | `_project-context.sh` | 136 | PreToolUse | Sync (1x/session) | 3s |
 | Passive Activator | `_passive-activator.sh` | 66 | PreToolUse | Sync | 5s |
 | Instinct Activator | `_instinct-activator.sh` | 221 | PreToolUse | Sync | 5s |
 | Observer (post) | `observe_v3.py` | — | PostToolUse | Async | 10s |
 | Session Learner | `_session-learner.sh` | 329 | Stop | Sync | 15s |
+
+### Laws tier (v4.5)
+
+Always-injected one-liner projections of permanent instincts (or stand-alone seeds). Rotated by `last_injected` ASC, capped at 10 laws / ~300 tokens per session. 5 seeds ship from fs-cortex (MIT © Fernando Montero): `read-first`, `grep-read-verify`, `git-triple-check`, `never-hardcode-secrets`, `three-layer-security`. New laws distilled via `/promote --law` after an instinct is promoted to `permanent`.
 
 ---
 

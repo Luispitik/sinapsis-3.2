@@ -1,0 +1,9 @@
+---
+id: three-layer-security
+source_instinct: null
+source: seed:fermontero-fs-cortex
+license: MIT
+created: 2026-04-18
+last_injected: 1970-01-01T00:00:00Z
+---
+Enforce 3-layer security: middleware auth -> API route validation -> Supabase RLS.
