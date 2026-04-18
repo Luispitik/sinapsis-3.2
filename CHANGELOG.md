@@ -1,5 +1,12 @@
 # Changelog
 
+## v4.4.2 (2026-04-18)
+
+### Fixed
+- **`_generate-dashboard.py` crashed on `_catalog.json` dict schema** (regression from v4.4.0): `collect_skills()` iterated `cat` assuming a flat list, but the canonical catalog is `{globalSkills: [...], librarySkills: [...]}`. On any fresh v4.4.0/v4.4.1 install, the very first `/dashboard-sinapsis` run raised `AttributeError: 'str' object has no attribute 'get'`. Fix: detect dict vs list shape, concatenate `globalSkills + librarySkills`, derive real global count from the dict instead of hardcoding 5, and guard all `.get()` calls with `isinstance(s, dict)` so mixed content cannot crash. Reported in [#6](https://github.com/Luispitik/sinapsis/issues/6) by @fvayas, fixed in [#7](https://github.com/Luispitik/sinapsis/pull/7) by @NestorPVsf.
+
+---
+
 ## v4.4.1 (2026-04-17)
 
 ### Fixed
