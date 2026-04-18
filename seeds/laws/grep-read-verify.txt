@@ -1,0 +1,9 @@
+---
+id: grep-read-verify
+source_instinct: null
+source: seed:fermontero-fs-cortex
+license: MIT
+created: 2026-04-18
+last_injected: 1970-01-01T00:00:00Z
+---
+Always Grep -> Read -> Verify before editing any file. Never edit blind.

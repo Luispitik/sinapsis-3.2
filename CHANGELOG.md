@@ -1,5 +1,27 @@
 # Changelog
 
+## v4.5.0 (2026-04-18) — unreleased
+
+### Added — Laws tier (inspired by fs-cortex, credit: Fernando Montero / MIT)
+- **`core/_laws-injector.sh`** (new SessionStart hook): emits `SESSION_PREFETCH_LAWS:` lines from `~/.claude/skills/_laws/*.txt`. Max 10 laws per session, cap ~300 tokens (conservative 4 chars/token). Rotates by `last_injected` ASC for variety across sessions. Atomic write (tmp → rename) survives concurrent sessions.
+- **`seeds/laws/*.txt`** (5 ported seeds, MIT © Fernando Montero): `read-first`, `grep-read-verify`, `git-triple-check`, `never-hardcode-secrets`, `three-layer-security`.
+- **`seeds/laws/README.md`**: schema + attribution.
+- **Law model**: `Law = one-line projection of a permanent instinct (or stand-alone seed)`. `source_instinct: null` → stand-alone. `/promote --law` distills a permanent instinct into a Law (see `commands/promote.md` Step 4).
+- **10 TDD tests** (`tests/test-laws.sh`): presence, seed count, empty-dir silent exit, emission format, MAX_LAWS cap, `last_injected` atomic update, rotation ordering, malformed-file resilience, whitespace normalization. 10/10 GREEN.
+
+### Changed
+- `install.sh`: copies `_laws-injector.sh` + seed laws into `~/.claude/skills/_laws/` (idempotent; existing files preserve their `last_injected`).
+- `core/settings.template.json`: adds `SessionStart` hooks section (`_hooks_total`: 6 → 7, `_hooks_breakdown`: `SessionStart(1) + PreToolUse(4) + PostToolUse(1) + Stop(1)`).
+- `commands/promote.md`: adds Step 4 "Offer Law Distillation" — when an instinct is promoted to `permanent`, user can accept a suggested one-liner to write into `_laws/`.
+
+### Rationale
+Sinapsis already projected patterns as instincts (regex-gated, per-tool-use injection). What was missing: a thin tier of **always-on crystallized wisdom** — the 5-10 principles the user never wants to risk forgetting, no matter the context. Matches fs-cortex's `laws` concept without replacing instincts: laws are a *projection* of permanents, not a parallel registry. Existing commands (`/promote`, `/evolve`) keep working unchanged; the hook is purely additive at the end of the SessionStart array.
+
+### Test badge
+116 → 126 passing (suite-wide, 8 test files).
+
+---
+
 ## v4.4.1 (2026-04-17)
 
 ### Fixed

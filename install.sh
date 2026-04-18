@@ -166,6 +166,7 @@ cp "$SCRIPT_DIR/core/_eod-gather.sh" "$SKILLS_DIR/_eod-gather.sh"
 cp "$SCRIPT_DIR/core/_dream.sh" "$SKILLS_DIR/_dream.sh"
 cp "$SCRIPT_DIR/core/_generate-dashboard.py" "$SKILLS_DIR/_generate-dashboard.py"
 cp "$SCRIPT_DIR/core/_dashboard-template.html" "$SKILLS_DIR/_dashboard-template.html"
+cp "$SCRIPT_DIR/core/_laws-injector.sh" "$SKILLS_DIR/_laws-injector.sh"
 
 chmod +x "$SKILLS_DIR/_passive-activator.sh"
 chmod +x "$SKILLS_DIR/_instinct-activator.sh"
@@ -173,9 +174,24 @@ chmod +x "$SKILLS_DIR/_session-learner.sh"
 chmod +x "$SKILLS_DIR/_project-context.sh"
 chmod +x "$SKILLS_DIR/_eod-gather.sh"
 chmod +x "$SKILLS_DIR/_dream.sh"
+chmod +x "$SKILLS_DIR/_laws-injector.sh"
 chmod +x "$SKILLS_DIR/_generate-dashboard.py" 2>/dev/null || true
 
-echo -e "${GREEN}  OK${NC} 5 hook scripts + dream cycle + dashboard generator installed"
+# ── Step 5c: Ship-with-install seed laws (v4.5) ──
+# Copy seed laws to ~/.claude/skills/_laws/. Idempotent: existing files preserved
+# (last_injected timestamps survive upgrades).
+if [ -d "$SCRIPT_DIR/seeds/laws" ]; then
+  mkdir -p "$SKILLS_DIR/_laws"
+  for lawfile in "$SCRIPT_DIR/seeds/laws"/*.txt; do
+    [ -f "$lawfile" ] || continue
+    lawname=$(basename "$lawfile")
+    if [ ! -f "$SKILLS_DIR/_laws/$lawname" ]; then
+      cp "$lawfile" "$SKILLS_DIR/_laws/$lawname"
+    fi
+  done
+fi
+
+echo -e "${GREEN}  OK${NC} 6 hook scripts + dream cycle + dashboard generator + laws injector installed"
 
 # ── Step 5b: Legacy file cleanup (v4.3.3) ──
 LEGACY_CLEANED=0

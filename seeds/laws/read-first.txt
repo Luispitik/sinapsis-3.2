@@ -1,0 +1,9 @@
+---
+id: read-first
+source_instinct: null
+source: seed:fermontero-fs-cortex
+license: MIT
+created: 2026-04-18
+last_injected: 1970-01-01T00:00:00Z
+---
+Always read documentation and instructions before executing any skill or command.
