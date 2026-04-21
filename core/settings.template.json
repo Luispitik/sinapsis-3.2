@@ -1,7 +1,7 @@
 {
-  "_comment": "Sinapsis v4.1 — settings.json template. Copy to ~/.claude/settings.json (merge with existing).",
-  "_hooks_total": 6,
-  "_hooks_breakdown": "PreToolUse(4) + PostToolUse(1) + Stop(1)",
+  "_comment": "Sinapsis v4.5 — settings.json template. Copy to ~/.claude/settings.json (merge with existing).",
+  "_hooks_total": 7,
+  "_hooks_breakdown": "PreToolUse(4) + PostToolUse(1) + Stop(1) + PreCompact(1)",
   "hooks": {
     "PreToolUse": [
       {
@@ -60,6 +60,18 @@
             "type": "command",
             "command": "bash ~/.claude/skills/_session-learner.sh",
             "timeout": 15
+          }
+        ]
+      }
+    ],
+    "PreCompact": [
+      {
+        "hooks": [
+          {
+            "_comment": "precompact-guard (v4.5): flush observations via learner before context compaction — prevents data loss in long sessions",
+            "type": "command",
+            "command": "bash ~/.claude/skills/_precompact-guard.sh",
+            "timeout": 10
           }
         ]
       }

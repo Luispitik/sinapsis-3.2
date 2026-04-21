@@ -123,11 +123,16 @@ process.stdin.on("end", () => {
 
   // Priority sort: permanent first, then confirmed; within same level, highest occurrences wins
   // v4.2.1: occurrences tiebreaker (inspired by fs-cortex confidence granularity)
+  // v4.5: id alphabetical tiebreaker — guarantees deterministic order across runs so the
+  //       injected systemMessage prefix is byte-stable across consecutive tool uses, which
+  //       is the prerequisite for prompt-cache hits on the Opus 4.7+ cached system block.
   const order = { permanent: 0, confirmed: 1 };
   injectableMatches.sort((a, b) => {
     const lvl = (order[a.level] ?? 2) - (order[b.level] ?? 2);
     if (lvl !== 0) return lvl;
-    return (b.occurrences || 0) - (a.occurrences || 0); // higher occurrences = higher priority
+    const occ = (b.occurrences || 0) - (a.occurrences || 0);
+    if (occ !== 0) return occ;
+    return (a.id || "").localeCompare(b.id || ""); // v4.5 cache stability tiebreaker
   });
 
   // Deduplicate by domain — keep only highest priority match per domain
@@ -136,7 +141,10 @@ process.stdin.on("end", () => {
     const d = m.domain || "_default";
     if (!domainMap[d]) domainMap[d] = m; // already sorted, first = highest priority
   }
-  const top = Object.values(domainMap).slice(0, 3);
+  // v4.5: top-N raised from 3 to 6 — with Opus 4.7 prompt caching the cost of extra
+  // instincts is amortised across tool uses, so we can be more generous per turn.
+  const MAX_INSTINCTS_INJECTED = 6;
+  const top = Object.values(domainMap).slice(0, MAX_INSTINCTS_INJECTED);
 
   // v4.3.1: sanitize inject content (#5F — prompt injection prevention)
   const INJECT_MAX_LEN = 500;
@@ -144,7 +152,8 @@ process.stdin.on("end", () => {
   // v4.3.3: path traversal protection (inspired by Cortex v3.10)
   const PATH_TRAVERSAL = /\.\.[\/\\]|~\/|\/etc\/|\/proc\/|%2e%2e/i;
   // v4.3.3: token budget cap — max chars injected per tool use (inspired by Cortex 8000/session)
-  const TOKEN_BUDGET = 1500;
+  // v4.5: raised 1500 → 4000 to match 6-instinct cap; still well below any sane context ceiling.
+  const TOKEN_BUDGET = 4000;
 
   // Only output systemMessage if there are injectable matches
   if (top.length > 0) {

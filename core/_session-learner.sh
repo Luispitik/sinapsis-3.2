@@ -39,11 +39,12 @@ const indexFile = process.argv[2];
 const proposalsFile = process.argv[3];
 const logFile = process.argv[4];
 
-// Read last 1000 lines of observations (v4.2: was 100, covers parallel sessions)
+// Read last 5000 lines of observations (v4.5: was 1000; Opus 4.7 1M context absorbs the
+// extra payload without pressure and lets cross-session detectors see a longer window).
 let lines;
 try {
   const content = fs.readFileSync(obsFile, "utf8").trim().split("\n");
-  lines = content.slice(-1000).map(l => { try { return JSON.parse(l); } catch(e) { return null; } }).filter(Boolean);
+  lines = content.slice(-5000).map(l => { try { return JSON.parse(l); } catch(e) { return null; } }).filter(Boolean);
 } catch(e) { process.exit(0); }
 
 if (lines.length < 3) process.exit(0);
