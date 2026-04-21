@@ -1,8 +1,8 @@
-# Sinapsis v4.3.3 — Feature Reference
+# Sinapsis v4.5 — Feature Reference
 
 > Complete inventory of all features, commands, hooks, modules, and capabilities.
 > **Update this file with every feat/fix commit.**
-> Last updated: 2026-04-13
+> Last updated: 2026-04-21
 
 ---
 
@@ -34,20 +34,23 @@ Parallel systems (not part of the confidence pipeline):
 | **SessionStart** | Project context.md + EOD resume | Once per session (via _project-context.sh) | ~150 |
 | **PreToolUse** | Instincts (max 3) + Passive Rules (max 3) | Every tool use (if trigger matches) | ~200 max |
 
-### 6-Hook Pipeline
+### 7-Hook Pipeline (v4.5)
 
 | Hook | File | Lines | Event | Mode | Timeout |
 |---|---|---|---|---|---|
 | Observer | `observe_v3.py` | 200 | Pre/PostToolUse | Async (0 tokens) | 10s |
 | Project Context | `_project-context.sh` | 136 | PreToolUse | Sync (1x/session) | 3s |
 | Passive Activator | `_passive-activator.sh` | 66 | PreToolUse | Sync | 5s |
-| Instinct Activator | `_instinct-activator.sh` | 221 | PreToolUse | Sync | 5s |
+| Instinct Activator | `_instinct-activator.sh` | 226 | PreToolUse | Sync | 5s |
 | Observer (post) | `observe_v3.py` | — | PostToolUse | Async | 10s |
 | Session Learner | `_session-learner.sh` | 329 | Stop | Sync | 15s |
+| PreCompact Guard | `_precompact-guard.sh` | 30 | PreCompact | Sync (fire-and-forget) | 10s |
+
+**v4.5 additions:** PreCompact hook flushes the learner before context compaction so long sessions do not lose fresh observations. Instinct injection is now byte-stable across calls (id-alphabetical tiebreaker) to unlock prompt-cache hits on Opus 4.7's cached system block. Caps raised: `TOKEN_BUDGET` 1500→4000, top-N instincts 3→6, observation window 1000→5000 lines.
 
 ---
 
-## Hooks (7 files)
+## Hooks (8 files)
 
 ### observe_v3.py — Observation Capture (200 lines)
 - Single Python process, captures ALL tool uses as JSONL

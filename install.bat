@@ -3,7 +3,7 @@ chcp 65001 >nul 2>&1
 setlocal enabledelayedexpansion
 
 :: ============================================================
-::  Sinapsis v4.3 — Installer for Windows
+::  Sinapsis v4.5 — Installer for Windows
 ::  Skills on Demand for Claude Code
 ::  https://github.com/Luispitik/sinapsis
 :: ============================================================
@@ -18,7 +18,7 @@ set "SCRIPT_DIR=%~dp0"
 
 echo.
 echo ============================================================
-echo   Sinapsis v4.3 -- Skills on Demand for Claude Code
+echo   Sinapsis v4.5 -- Skills on Demand for Claude Code
 echo   The system that learns and adapts to you
 echo ============================================================
 echo.
@@ -42,7 +42,7 @@ if %errorlevel% neq 0 (
 where node >nul 2>&1
 if %errorlevel% neq 0 (
     echo   ERROR: Node.js not found.
-    echo          Sinapsis v4.3 hooks require Node.js.
+    echo          Sinapsis v4.5 hooks require Node.js.
     echo          Install it: https://nodejs.org
     pause
     exit /b 1
@@ -150,8 +150,9 @@ copy /Y "%SCRIPT_DIR%core\_session-learner.sh" "%SKILLS_DIR%\_session-learner.sh
 copy /Y "%SCRIPT_DIR%core\_project-context.sh" "%SKILLS_DIR%\_project-context.sh" >nul
 copy /Y "%SCRIPT_DIR%core\_eod-gather.sh" "%SKILLS_DIR%\_eod-gather.sh" >nul
 copy /Y "%SCRIPT_DIR%core\_dream.sh" "%SKILLS_DIR%\_dream.sh" >nul
+copy /Y "%SCRIPT_DIR%core\_precompact-guard.sh" "%SKILLS_DIR%\_precompact-guard.sh" >nul
 
-echo   OK 5 hook scripts + dream cycle installed
+echo   OK 6 hook scripts + dream cycle installed
 echo   NOTE: On Windows, hooks run via Git Bash or WSL. See README for details.
 
 :: Step 6: Configure settings.json
@@ -160,7 +161,7 @@ echo [6/8] Configuring hooks in settings.json...
 if not exist "%CLAUDE_HOME%\settings.json" (
     node -e "var fs=require('fs'),p1=process.argv[1],p2=process.argv[2];var t=JSON.parse(fs.readFileSync(p1,'utf8'));function s(o){if(Array.isArray(o))return o.map(s);if(typeof o==='object'&&o!==null){var r={};for(var k in o){if(k[0]==='_')continue;r[k]=s(o[k]);}return r;}return o;}fs.writeFileSync(p2,JSON.stringify(s(t),null,2));" "%SCRIPT_DIR%core\settings.template.json" "%CLAUDE_HOME%\settings.json" >nul 2>&1
     if %errorlevel% equ 0 (
-        echo   OK settings.json created with v4.4 hooks
+        echo   OK settings.json created with v4.5 hooks (PreCompact included)
     ) else (
         echo   ! Could not auto-create settings.json
         echo     Copy core\settings.template.json to %CLAUDE_HOME%\settings.json manually
@@ -196,9 +197,9 @@ echo   OK %cmd_count% commands installed
 echo.
 echo ============================================================
 if "%UPGRADING%"=="true" (
-    echo   Sinapsis v4.3 upgrade complete!
+    echo   Sinapsis v4.5 upgrade complete!
 ) else (
-    echo   Sinapsis v4.3 installed!
+    echo   Sinapsis v4.5 installed!
 )
 echo ============================================================
 echo.
@@ -206,7 +207,7 @@ echo   What was installed:
 echo   - 2 global skills (skill-router + sinapsis-learning)
 echo   - %skill_count% total skills
 echo   - %cmd_count% slash commands (/evolve, /clone, /system-status...)
-echo   - 5 hook scripts + dream cycle (passive-activator, instinct-activator, session-learner, project-context, eod-gather, dream)
+echo   - 6 hook scripts + dream cycle (passive-activator, instinct-activator, session-learner, project-context, eod-gather, dream, precompact-guard)
 echo   - Core config: catalog, passive rules, instincts index, operator state
 echo.
 echo   Next step:
