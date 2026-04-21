@@ -1,7 +1,7 @@
-# Sinapsis v4.4.2
+# Sinapsis v4.5.0
 
-[![Version](https://img.shields.io/badge/version-4.4.2-blue.svg)](https://github.com/Luispitik/sinapsis)
-[![Tests](https://img.shields.io/badge/tests-99%20passing-green.svg)](tests/)
+[![Version](https://img.shields.io/badge/version-4.5.0-blue.svg)](https://github.com/Luispitik/sinapsis)
+[![Tests](https://img.shields.io/badge/tests-112%20passing-green.svg)](tests/)
 [![CI](https://github.com/Luispitik/sinapsis/actions/workflows/tests.yml/badge.svg)](https://github.com/Luispitik/sinapsis/actions)
 [![License](https://img.shields.io/badge/license-Source%20Available-orange.svg)](LICENSE)
 
@@ -27,6 +27,16 @@ Every time you start a new session, Claude starts from zero. Your preferences, y
 Think of it as going from a dumb terminal to an assistant that actually knows you.
 
 ---
+
+## What's New in v4.5.0 — Opus 4.7 Integration
+
+> Ride the cache, catch the compaction, raise the ceiling.
+
+- **Cache-stable instinct ordering**: added an `id.localeCompare` tiebreaker after the priority + occurrences sort. The injected `systemMessage` prefix is now byte-stable across consecutive tool uses, which unlocks prompt-cache hits on Opus 4.7's cached system block (~90 % discount on the instinct payload once the cache warms).
+- **New `PreCompact` hook** (`_precompact-guard.sh`): fires right before Claude Code compacts the context in long-running sessions and re-runs the session-learner so fresh observations are flushed to proposals before the transcript is rewritten. Uses a fire-and-forget pattern with an 8 s cap — compaction is never blocked.
+- **Caps raised for 1M context**: `TOKEN_BUDGET` 1500 → 4000, top-N instincts per tool use 3 → 6, observation window for the learner 1000 → 5000 lines. Cross-session detectors (repetitions, agent patterns) see a longer history; per-turn injection can surface more relevant rules.
+- **Opt-in adaptive thinking for `/analyze-session`**: design published in [`docs/rfc-v5-adaptive-thinking.md`](docs/rfc-v5-adaptive-thinking.md). Not shipped enabled — core stays fully deterministic, SDK path is additive and gated by `SINAPSIS_LLM_ANALYZE=1`.
+- **11 new TDD tests** (`tests/test-v45-opus47.sh`): shuffled-index byte-identical output, alphabetical tiebreaker, PreCompact wiring end-to-end, and cap assertions. All existing suites re-run clean: 112 total passing.
 
 ## What's New in v4.4.0 — Observability Dashboard
 

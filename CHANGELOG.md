@@ -1,5 +1,31 @@
 # Changelog
 
+## v4.5.0 (2026-04-21)
+
+### Added — Opus 4.7 integration
+
+- **Cache-stable instinct ordering** (`_instinct-activator.sh`): added alphabetical `id.localeCompare` tiebreaker after the priority + occurrences sort. The injected `systemMessage` prefix is now byte-stable across consecutive tool uses with the same match set, which is the prerequisite for prompt-cache hits on Opus 4.7's cached system block (~90% discount on input tokens once the cache warms).
+- **`PreCompact` hook** (`core/_precompact-guard.sh`, new): fires right before Claude Code compacts the context in long-running sessions and re-invokes the session-learner so fresh observations are flushed to proposals before the transcript is rewritten. Uses `timeout 8` and a fire-and-forget pattern to never block the harness; relies on the existing advisory lock inside `_session-learner.sh` for parallel safety.
+- **`settings.template.json`** now declares the new PreCompact hook (hooks 6 → 7). `install.sh` copies and chmods `_precompact-guard.sh`.
+- **RFC `docs/rfc-v5-adaptive-thinking.md`**: design for an opt-in `SINAPSIS_LLM_ANALYZE=1` branch in `/analyze-session` that uses Opus 4.7 adaptive thinking via the Anthropic SDK. Not implemented in this release — ships as a design doc so the core stays fully deterministic until the approach is validated.
+
+### Changed — Caps raised for 1M context
+
+- `_instinct-activator.sh`: `TOKEN_BUDGET` 1500 → 4000, top-N per tool use 3 → 6 (`MAX_INSTINCTS_INJECTED`). With Opus 4.7's 1M window and prompt caching the cost of the extra injection is amortised, so we can surface more instincts per turn.
+- `_session-learner.sh`: observation window 1000 → 5000 lines. Cross-session detectors (repetitions, agent patterns) now see a longer history without paging.
+- `_operator-state.json` d017: Scout/Analyst blueprint switched from Haiku to Sonnet 4.6 per operator preference; Architect stays on Opus (now 4.7).
+
+### Tests
+
+- New suite `tests/test-v45-opus47.sh` — 11 TDD tests covering deterministic ordering (shuffled-index byte-identical output, alphabetical tiebreaker), PreCompact hook (file present, executable, wired in settings and install.sh), and raised caps.
+- All existing suites re-run clean: `test-install-upgrade` 21/21, `test-dashboard` 12/12, `test-dream` 25/25, `test-gstack-separation` 18/18, `test-security` 11/11, `test-v433-hardening` 14/14.
+
+### Rationale
+
+Opus 4.7 brings three things Sinapsis can actually use: a stable 1-hour cache TTL that rewards byte-stable prefixes, a 1M context that removes pressure on per-turn caps, and the PreCompact hook Anthropic now ships in Claude Code. None of the "flashy" features (memory tool, context editing) are a natural fit: Sinapsis already *is* a memory system and the inject happens in a stable systemMessage. The v4.5 changes are purely about making the existing design richer and cheaper to run on top of Opus 4.7, without introducing a new LLM dependency in the hot path.
+
+---
+
 ## v4.4.2 (2026-04-18)
 
 ### Fixed
